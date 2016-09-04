@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
     private final static int RESULT_LOAD_IMAGE = 1;
 
     FloatingActionButton fabCam, fabBrowse;
-
+    //This is a sample comment na gawa ni Aljohn. Tutorial ng Git
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
