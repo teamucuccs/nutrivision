@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/AndroidMasters.iml" filepath="$PROJECT_DIR$/AndroidMasters.iml" />
+      <module fileurl="file://$PROJECT_DIR$/NutriVision.iml" filepath="$PROJECT_DIR$/NutriVision.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>
