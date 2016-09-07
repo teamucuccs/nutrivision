@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">NutriVision</string>
+
+    <string name="fab_str_browse">Browse Photo</string>
+    <string name="fab_str_capture">Open Camera</string>
+
+    <string name="empty_str_recent">No recent activity. \nEnjoy your day!</string>
+    <string name="title_activity_results">Result</string>
+    <string name="sample_text">"Lorem ipsum dolor sit amet, consectetur adipisicing elit. Molestiae rerum quaerat similique, cumque enim voluptate ea vero doloremque veritatis quo accusamus ipsa laudantium officia quas quasi, eligendi excepturi eaque? Quidem. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Molestiae rerum quaerat similique, cumque enim voluptate ea vero doloremque veritatis quo accusamus ipsa laudantium officia quas quasi, eligendi excepturi eaque? Quidem. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Molestiae rerum quaerat similique, cumque enim voluptate ea vero doloremque veritatis quo accusamus ipsa laudantium officia quas quasi, eligendi excepturi eaque? Quidem. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Molestiae rerum quaerat similique, cumque enim voluptate ea vero doloremque veritatis quo accusamus ipsa laudantium officia quas quasi, eligendi excepturi eaque? Quidem."</string>
 </resources>

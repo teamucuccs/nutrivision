@@ -1,10 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fab="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/layoutRoot"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="edu.ucuccs.nutrivision.MainActivity">
+    android:layout_height="match_parent">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:layout_height="match_parent">
 
+        <include
+            layout="@layout/layout_toolbar"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" />
 
-    <include layout="@layout/fab_layout"/>
-</RelativeLayout>
+        <include
+            layout="@layout/layout_empty_state"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <include
+            layout="@layout/layout_progress"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.github.clans.fab.FloatingActionMenu
+            android:id="@+id/fab_menu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|right"
+            android:layout_marginBottom="8dp"
+            android:layout_marginRight="8dp">
+
+            <com.github.clans.fab.FloatingActionButton
+                android:id="@+id/menu_camera"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_camera_24dp"
+                fab:fab_size="mini"
+                fab:fab_label="@string/fab_str_capture" />
+            <com.github.clans.fab.FloatingActionButton
+                android:id="@+id/menu_browse"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_collections_24dp"
+                fab:fab_size="mini"
+                fab:fab_label="@string/fab_str_browse" />
+        </com.github.clans.fab.FloatingActionMenu>
+
+    </FrameLayout>
+</android.support.design.widget.CoordinatorLayout>

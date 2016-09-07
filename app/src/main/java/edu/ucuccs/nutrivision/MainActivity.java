@@ -2,14 +2,12 @@ package edu.ucuccs.nutrivision;
 
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.afollestad.materialcamera.MaterialCamera;
@@ -25,16 +23,19 @@ public class MainActivity extends AppCompatActivity {
 
     FloatingActionButton mFabCam, mFabBrowse;
     FloatingActionMenu fabMenu;
+    private Toolbar mToolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
         mFabCam = (FloatingActionButton) findViewById(R.id.menu_camera);
         mFabBrowse = (FloatingActionButton) findViewById(R.id.menu_browse);
         fabMenu = (FloatingActionMenu)findViewById(R.id.fab_menu);
 
+        setUpToolbar();
 
         mFabCam.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -47,15 +48,19 @@ public class MainActivity extends AppCompatActivity {
         mFabBrowse.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                browseGal();
+                browseGallery();
                 fabMenu.close(true);
             }
         });
     }
 
+    void setUpToolbar(){
+        setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+    }
+
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public void cameraShot() {
-
         MaterialCamera materialCamera = new MaterialCamera(this)
                 .showPortraitWarning(true)
                 .allowRetry(true)
@@ -66,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void browseGal() {
+    public void browseGallery() {
         Intent i = new Intent(
                 Intent.ACTION_PICK,
                 android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
@@ -80,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == CAMERA_RQ) {
             if (resultCode == RESULT_OK) {
                 File file = new File(data.getData().getPath());
-                Intent i = new Intent(this, SecondActivity.class);
+                Intent i = new Intent(this, ResultActivity.class);
                 i.putExtra("image", file);
                 startActivity(i);
 
@@ -107,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
 
             File file = new File(picturePath);
 
-            Intent i = new Intent(this, SecondActivity.class);
+            Intent i = new Intent(this, ResultActivity.class);
             i.putExtra("image", file);
             startActivity(i);
 
