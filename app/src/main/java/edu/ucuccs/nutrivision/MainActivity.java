@@ -84,9 +84,8 @@ public class MainActivity extends AppCompatActivity {
 
         if (requestCode == CAMERA_RQ) {
             if (resultCode == RESULT_OK) {
-                File file = new File(data.getData().getPath());
                 Intent i = new Intent(this, ResultActivity.class);
-                i.putExtra("image", file);
+                i.putExtra("image", data.getData().toString());
                 startActivity(i);
 
             } else if (data != null) {
