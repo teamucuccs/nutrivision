@@ -18,7 +18,11 @@
         <include
             layout="@layout/layout_empty_state"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"/>
+
+        <include layout="@layout/image_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
 
         <include
             layout="@layout/layout_progress"
@@ -32,11 +36,15 @@
 
         <com.github.clans.fab.FloatingActionMenu
             android:id="@+id/fab_menu"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|right"
-            android:layout_marginBottom="8dp"
-            android:layout_marginRight="8dp">
+            fab:menu_backgroundColor="#ccffffff"
+            fab:menu_labels_ellipsize="end"
+            fab:menu_labels_singleLine="true"
+            android:paddingBottom="10dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="bottom|right">
 
             <com.github.clans.fab.FloatingActionButton
                 android:id="@+id/menu_camera"
@@ -52,6 +60,20 @@
                 android:src="@drawable/ic_collections_24dp"
                 fab:fab_size="mini"
                 fab:fab_label="@string/fab_str_browse" />
+            <com.github.clans.fab.FloatingActionButton
+                android:id="@+id/menu_speak"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_mic_black_24dp"
+                fab:fab_size="mini"
+                fab:fab_label="@string/fab_str_speak" />
+            <com.github.clans.fab.FloatingActionButton
+                android:id="@+id/menu_search"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_search_black_24dp"
+                fab:fab_size="mini"
+                fab:fab_label="@string/fab_str_search" />
         </com.github.clans.fab.FloatingActionMenu>
 
     </FrameLayout>

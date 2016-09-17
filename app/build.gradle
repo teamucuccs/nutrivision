@@ -26,7 +26,6 @@ dependencies {
     compile 'com.android.support:design:24.2.0'
     compile 'com.android.support:recyclerview-v7:24.2.0'
     compile 'com.github.clans:fab:1.6.4'
-    compile 'com.afollestad:material-camera:0.3.1'
     compile 'com.clarifai:clarifai-api-java:1.2.0'
     compile 'com.android.volley:volley:1.0.0'
 

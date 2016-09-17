@@ -1,29 +1,51 @@
 package edu.ucuccs.nutrivision;
 
 import android.content.Intent;
-import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Toast;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
-import com.afollestad.materialcamera.MaterialCamera;
+import com.clarifai.api.ClarifaiClient;
+import com.clarifai.api.RecognitionRequest;
+import com.clarifai.api.RecognitionResult;
+import com.clarifai.api.Tag;
+import com.clarifai.api.exception.ClarifaiException;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 
-import java.io.File;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
+import edu.ucuccs.nutrivision.custom.AdjustableLayout;
+
+import static android.provider.MediaStore.Images.Media;
 public class MainActivity extends AppCompatActivity {
 
-    private final static int CAMERA_RQ = 6969;
-    private final static int RESULT_LOAD_IMAGE = 1;
+    private final ClarifaiClient client = new ClarifaiClient(Credentials.CLARIFAI.CLIENT_ID, Credentials.CLARIFAI.CLIENT_SECRET);
+    private static final String TAG = MainActivity.class.getSimpleName();
+    private static final int CODE_PICK = 1;
 
-    FloatingActionButton mFabCam, mFabBrowse;
-    FloatingActionMenu fabMenu;
+    private final List<String> tagsListInitial = new ArrayList<>();
+    private FloatingActionButton mFabCam, mFabBrowse;
+    private FloatingActionMenu fabMenu;
+    private AdjustableLayout adjustableLayout;
+    private TextView mLblResultTags;
+    private ImageView imgResult;
     private Toolbar mToolbar;
+
+    private LinearLayout mLinearEmpty;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +56,10 @@ public class MainActivity extends AppCompatActivity {
         mFabCam = (FloatingActionButton) findViewById(R.id.menu_camera);
         mFabBrowse = (FloatingActionButton) findViewById(R.id.menu_browse);
         fabMenu = (FloatingActionMenu)findViewById(R.id.fab_menu);
+        imgResult = (ImageView) findViewById(R.id.img_result);
+        mLblResultTags = (TextView) findViewById(R.id.lbl_result_tag);
+
+        mLinearEmpty = (LinearLayout) findViewById(R.id.layout_empty_state);
 
         setUpToolbar();
 
@@ -61,61 +87,114 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public void cameraShot() {
-        MaterialCamera materialCamera = new MaterialCamera(this)
-                .showPortraitWarning(true)
-                .allowRetry(true)
-                .defaultToFrontFacing(false);
-
-        materialCamera.stillShot();
-        materialCamera.start(CAMERA_RQ);
 
     }
 
     public void browseGallery() {
-        Intent i = new Intent(
-                Intent.ACTION_PICK,
-                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(i, RESULT_LOAD_IMAGE);
+        final Intent intent = new Intent(Intent.ACTION_PICK, Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(intent, CODE_PICK);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+    @Override protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+        if (requestCode == CODE_PICK && resultCode == RESULT_OK) {
+            mLinearEmpty.setVisibility(View.GONE);
+            Log.d(TAG, "onActivityResult: ");
 
-        if (requestCode == CAMERA_RQ) {
-            if (resultCode == RESULT_OK) {
-                Intent i = new Intent(this, ResultActivity.class);
-                i.putExtra("image", data.getData().toString());
-                startActivity(i);
+            final Bitmap bitmap = loadBitmapFromUri(intent.getData());
+            if (bitmap != null) {
+                imgResult.setImageBitmap(bitmap);
+                mLblResultTags.setText("Recognizing...");
 
-            } else if (data != null) {
-                Exception e = (Exception) data.getSerializableExtra(MaterialCamera.ERROR_EXTRA);
-                if (e != null) {
-                    e.printStackTrace();
-                    Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                }
+                new AsyncTask<Bitmap, Void, RecognitionResult>() {
+                    @Override protected RecognitionResult doInBackground(Bitmap... bitmaps) {
+                        Log.d(TAG, "doInBackground: "  + bitmaps[0]);
+                        return recognizeBitmap(bitmaps[0]);
+                    }
+                    @Override protected void onPostExecute(RecognitionResult result) {
+                        Log.d(TAG, "onPostExecute: " + result);
+                        updateUIForResult(result);
+                    }
+                }.execute(bitmap);
+            } else {
+                mLblResultTags.setText("Unable to load selected image.");
+            }
+        }
+    }
+    private Bitmap loadBitmapFromUri(Uri uri) {
+        try {
+            BitmapFactory.Options opts = new BitmapFactory.Options();
+            opts.inJustDecodeBounds = true;
+            BitmapFactory.decodeStream(getContentResolver().openInputStream(uri), null, opts);
+            int sampleSize = 1;
+            while (opts.outWidth / (2 * sampleSize) >= imgResult.getWidth() &&
+                    opts.outHeight / (2 * sampleSize) >= imgResult.getHeight()) {
+                sampleSize *= 2;
             }
 
+            opts = new BitmapFactory.Options();
+            opts.inSampleSize = sampleSize;
+            return BitmapFactory.decodeStream(getContentResolver().openInputStream(uri), null, opts);
+        } catch (IOException e) {
+            Log.e(TAG, "Error loading image: " + uri, e);
         }
-        if (requestCode == RESULT_LOAD_IMAGE && resultCode == RESULT_OK && null != data) {
-            Uri selectedImage = data.getData();
-            String[] filePathColumn = {MediaStore.Images.Media.DATA};
-
-            Cursor cursor = getContentResolver().query(selectedImage,
-                    filePathColumn, null, null, null);
-            cursor.moveToFirst();
-
-            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-            String picturePath = cursor.getString(columnIndex);
-            cursor.close();
-
-            File file = new File(picturePath);
-
-            Intent i = new Intent(this, ResultActivity.class);
-            i.putExtra("image", file);
-            startActivity(i);
-
-        }
-
+        return null;
     }
+
+    private RecognitionResult recognizeBitmap(Bitmap bitmap) {
+        try {
+            Bitmap scaled = Bitmap.createScaledBitmap(bitmap, 320,
+                    320 * bitmap.getHeight() / bitmap.getWidth(), true);
+
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            scaled.compress(Bitmap.CompressFormat.JPEG, 90, out);
+            byte[] jpeg = out.toByteArray();
+
+            return client.recognize(new RecognitionRequest(jpeg)).get(0);
+        } catch (ClarifaiException e) {
+            return null;
+        }
+    }
+
+    private void updateUIForResult(RecognitionResult result) {
+        tagsListInitial.clear();
+
+        if (result != null) {
+            if (result.getStatusCode() == RecognitionResult.StatusCode.OK) {
+                StringBuilder b = new StringBuilder();
+                for (Tag tag : result.getTags()) {
+                    tagsListInitial.add(tag.getName());
+                    b.append(b.length() > 0 ? ", " : "").append(tag.getName());
+                }
+
+                mLblResultTags.setVisibility(View.GONE);
+                addChipsViewFinal(tagsListInitial);
+                Log.d(TAG, "updateUIForResult: " + tagsListInitial.size());
+            } else {
+                Log.e(TAG, "Clarifai: " + result.getStatusMessage());
+                mLblResultTags.setText("Sorry, there was an error recognizing your image.");
+            }
+        } else {
+            mLblResultTags.setText("Sorry, there was an error recognizing your image.");
+        }
+    }
+    private void addChipsViewFinal(List<String> tagList) {
+        adjustableLayout = (AdjustableLayout) findViewById(R.id.container);
+        adjustableLayout.removeAllViews();
+        for (int i = 0; i < tagList.size(); i++) {
+            final View newView = LayoutInflater.from(this).inflate(R.layout.layout_view_chip_text, null);
+            TextView tvName = (TextView) newView.findViewById(R.id.txtChipContent);
+            ImageView ivRemove = (ImageView) newView.findViewById(R.id.imgChipRemove);
+            ivRemove.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    adjustableLayout.removeView(newView);
+                }
+            });
+            tvName.setText(tagList.get(i));
+            adjustableLayout.addingMultipleView(newView);
+        }
+        adjustableLayout.invalidateView();
+    }
+
 }

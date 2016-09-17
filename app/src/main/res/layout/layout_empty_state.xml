@@ -5,12 +5,12 @@
     android:layout_height="fill_parent"
     android:background="#FFF"
     android:orientation="vertical"
-    android:gravity="center_vertical">
+    android:gravity="center_vertical"
+    android:id="@+id/layout_empty_state">
 
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/imageView15"
                 android:layout_gravity="center_horizontal"
                 android:src="@drawable/empty_img_recent"
                 android:tint="#CCCCCC" />
@@ -20,7 +20,6 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="@string/empty_str_recent"
-                android:id="@+id/textView19"
                 android:layout_gravity="center_horizontal"
                 android:textColor="#CCCCCC"
                 android:gravity="center"

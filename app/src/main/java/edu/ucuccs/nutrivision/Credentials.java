@@ -1,19 +1,26 @@
 /**
- * Author: Aljohn De Guzman on 09/10/2016.
- * Website: http://ajdeguzman.x10.mx
- * E-mail: aljohndeguzman@gmail.com
+ * Author: UCU Knight Coders on 9/13/2016.
+ * Website: http://facebook.com/teamucuccs
+ * E-mail: teamucuccs@gmail.com
  */
 
 package edu.ucuccs.nutrivision;
 
 class Credentials {
-    // IMPORTANT NOTE: you should replace the CLIENT_ID and CLIENT_SECRET values below
-    // with your own. You can obtain these at https://developer.clarifai.com/applications -- the
-    // defaults are shared credentials that will stop working once their quota is reached.
-    //
-    // Also, if you're committing your code to a public repo, be careful not to check in your
-    // credentials -- we're including these here so you can get started out of the box, but this is
-    // generally a bad practice.
-    static final String CLIENT_ID = "zwJ0_m6KqZ53OCIzRtj0QKylz2XRg3GM_-vDaqDC";
-    static final String CLIENT_SECRET = "9R6CMdsJ1fctF5r1d1eEO6fMxNEu2pWzaN-JkPwH";
+
+    public String  nutrionixURL;
+
+    public interface CLARIFAI {
+        String CLIENT_ID = "F5fbBfo8MZtjMeeNWn_Fc9pC-u97usHofgiNz5tp";
+        String CLIENT_SECRET = "IhQv11zTu7slc_SQ9YTVdrKz40ufVPIzm2noKnkp";
+    }
+    public interface NUTRIONIX {
+        String APP_ID = "f8d8df72";
+        String API_KEY = "d9aea37b804ffef0a9cdc1378638706c";
+    }
+
+    public String returnURL(String keyword){
+        nutrionixURL = "https://api.nutritionix.com/v1_1/search/" + keyword + "?fields=item_name%2Citem_id%2Cbrand_name%2Cnf_calories%2Cnf_total_fat&appId=" + NUTRIONIX.APP_ID + "&appKey=" + NUTRIONIX.API_KEY;
+        return nutrionixURL;
+    }
 }

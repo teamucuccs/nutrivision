@@ -3,6 +3,8 @@
 
     <string name="fab_str_browse">Browse Photo</string>
     <string name="fab_str_capture">Open Camera</string>
+    <string name="fab_str_speak">Speak</string>
+    <string name="fab_str_search">Search</string>
 
     <string name="empty_str_recent">No recent activity. \nEnjoy your day!</string>
     <string name="title_activity_results">Result</string>

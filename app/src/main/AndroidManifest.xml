@@ -27,15 +27,6 @@
             android:name="com.afollestad.materialcamera.CaptureActivity" />
         <activity
             android:name="com.afollestad.materialcamera.CaptureActivity2" />
-        <activity android:name=".ResultActivity"
-            android:label="@string/title_activity_results"
-            android:theme="@style/AppTheme.ResultTheme">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
     </application>
 
 </manifest>
