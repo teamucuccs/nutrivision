@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/linear_chip_tag"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:animateLayoutChanges="true"
@@ -10,21 +11,11 @@
     android:padding="4dp">
 
     <TextView
-        android:id="@+id/txtChipContent"
+        android:id="@+id/txt_chip_content"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="5dp"
         android:textColor="#FFFFFF"
         android:textSize="15sp" />
-
-    <ImageView
-        android:id="@+id/imgChipRemove"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="5dp"
-        android:layout_marginStart="5dp"
-        android:src="@drawable/ic_clear_black_24dp"
-        android:tint="#FFF"
-        android:visibility="gone"
-        tools:ignore="ContentDescription" />
+    
 </LinearLayout>

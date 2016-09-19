@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/white"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingBottom="15dp"
+        android:paddingLeft="13dp"
+        android:paddingRight="13dp"
+        android:paddingTop="15dp">
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="5dp"
+                android:layout_marginStart="5dp"
+                android:gravity="center_vertical|fill_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:includeFontPadding="false"
+                    android:id="@+id/lblFoodTitle"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="1"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:text="Lorem" />
+
+                <ImageButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="22dp"
+                    android:layout_gravity="end"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:paddingBottom="25dp"
+                    android:paddingEnd="15dp"
+                    android:paddingLeft="25dp"
+                    android:paddingRight="15dp"
+                    android:paddingStart="25dp"
+                    android:paddingTop="25dp"
+                    android:tint="#7C7C7C"
+                    tools:ignore="ContentDescription" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="20dp"
+                android:orientation="horizontal"
+                android:weightSum="4"
+                android:gravity="center_vertical">
+
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:weightSum="2">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center_vertical"
+                        android:textSize="20sp"
+                        android:text="Servings"
+                        android:id="@+id/lblCalories"
+                        android:layout_weight="1"
+                        android:fontFamily="sans-serif-light"
+                        android:layout_margin="3dp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:paddingEnd="5dp"
+                        android:paddingRight="5dp"
+                        android:singleLine="true"
+                        android:textColor="#8C8C8C"
+                        android:textSize="12sp"
+                        android:text="Calories"
+                        android:layout_weight="1"
+                        android:layout_margin="3dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:weightSum="2">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center_vertical"
+                        android:textSize="20sp"
+                        android:text="Servings"
+                        android:id="@+id/lblFat"
+                        android:layout_weight="1"
+                        android:fontFamily="sans-serif-light"
+                        android:layout_margin="3dp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:paddingEnd="5dp"
+                        android:paddingRight="5dp"
+                        android:singleLine="true"
+                        android:textColor="#8C8C8C"
+                        android:textSize="12sp"
+                        android:text="Fat"
+                        android:id="@+id/textView"
+                        android:layout_weight="1"
+                        android:layout_margin="3dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:weightSum="2">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center_vertical"
+                        android:textSize="20sp"
+                        android:text="Servings"
+                        android:id="@+id/lblQuantity"
+                        android:layout_weight="1"
+                        android:fontFamily="sans-serif-light"
+                        android:layout_margin="3dp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center_vertical"
+                        android:paddingLeft="5dp"
+                        android:paddingStart="5dp"
+                        android:textSize="12sp"
+                        android:text="Quantity"
+                        android:layout_weight="1"
+                        android:layout_margin="3dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:weightSum="2">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:paddingLeft="5dp"
+                        android:paddingStart="5dp"
+                        android:textSize="20sp"
+                        android:text="Servings"
+                        android:layout_weight="1"
+                        android:fontFamily="sans-serif-light"
+                        android:layout_margin="3dp"
+                        android:id="@+id/lblServings" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center_vertical"
+                        android:paddingLeft="5dp"
+                        android:paddingStart="5dp"
+                        android:textSize="12sp"
+                        android:text="Unit"
+                        android:id="@+id/textView2"
+                        android:layout_weight="1"
+                        android:layout_margin="3dp" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+</LinearLayout>

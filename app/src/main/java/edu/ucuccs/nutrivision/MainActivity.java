@@ -24,6 +24,7 @@ import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,11 +32,13 @@ import java.util.List;
 import edu.ucuccs.nutrivision.custom.AdjustableLayout;
 
 import static android.provider.MediaStore.Images.Media;
+
 public class MainActivity extends AppCompatActivity {
 
     private final ClarifaiClient client = new ClarifaiClient(Credentials.CLARIFAI.CLIENT_ID, Credentials.CLARIFAI.CLIENT_SECRET);
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int CODE_PICK = 1;
+    private Intent data;
 
     private final List<String> tagsListInitial = new ArrayList<>();
     private FloatingActionButton mFabCam, mFabBrowse;
@@ -52,12 +55,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        mFabCam = (FloatingActionButton) findViewById(R.id.menu_camera);
-        mFabBrowse = (FloatingActionButton) findViewById(R.id.menu_browse);
-        fabMenu = (FloatingActionMenu)findViewById(R.id.fab_menu);
-        imgResult = (ImageView) findViewById(R.id.img_result);
-        mLblResultTags = (TextView) findViewById(R.id.lbl_result_tag);
+        mToolbar        = (Toolbar) findViewById(R.id.toolbar);
+        mFabCam         = (FloatingActionButton) findViewById(R.id.menu_camera);
+        mFabBrowse      = (FloatingActionButton) findViewById(R.id.menu_browse);
+        fabMenu         = (FloatingActionMenu)findViewById(R.id.fab_menu);
+        imgResult       = (ImageView) findViewById(R.id.img_result);
+        mLblResultTags  = (TextView) findViewById(R.id.lbl_result_tag);
 
         mLinearEmpty = (LinearLayout) findViewById(R.id.layout_empty_state);
 
@@ -95,13 +98,14 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intent, CODE_PICK);
     }
 
-    @Override protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        super.onActivityResult(requestCode, resultCode, intent);
+    @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == CODE_PICK && resultCode == RESULT_OK) {
+            this.data = data;
             mLinearEmpty.setVisibility(View.GONE);
             Log.d(TAG, "onActivityResult: ");
 
-            final Bitmap bitmap = loadBitmapFromUri(intent.getData());
+            final Bitmap bitmap = loadBitmapFromUri(data.getData());
             if (bitmap != null) {
                 imgResult.setImageBitmap(bitmap);
                 mLblResultTags.setText("Recognizing...");
@@ -166,12 +170,9 @@ public class MainActivity extends AppCompatActivity {
                     tagsListInitial.add(tag.getName());
                     b.append(b.length() > 0 ? ", " : "").append(tag.getName());
                 }
-
                 mLblResultTags.setVisibility(View.GONE);
                 addChipsViewFinal(tagsListInitial);
-                Log.d(TAG, "updateUIForResult: " + tagsListInitial.size());
             } else {
-                Log.e(TAG, "Clarifai: " + result.getStatusMessage());
                 mLblResultTags.setText("Sorry, there was an error recognizing your image.");
             }
         } else {
@@ -182,16 +183,24 @@ public class MainActivity extends AppCompatActivity {
         adjustableLayout = (AdjustableLayout) findViewById(R.id.container);
         adjustableLayout.removeAllViews();
         for (int i = 0; i < tagList.size(); i++) {
-            final View newView = LayoutInflater.from(this).inflate(R.layout.layout_view_chip_text, null);
-            TextView tvName = (TextView) newView.findViewById(R.id.txtChipContent);
-            ImageView ivRemove = (ImageView) newView.findViewById(R.id.imgChipRemove);
-            ivRemove.setOnClickListener(new View.OnClickListener() {
+            final View newView          = LayoutInflater.from(this).inflate(R.layout.layout_view_chip_text, null);
+            LinearLayout linearChipTag  = (LinearLayout) newView.findViewById(R.id.linear_chip_tag);
+            final TextView txtChipTag         = (TextView) newView.findViewById(R.id.txt_chip_content);
+
+            linearChipTag.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    adjustableLayout.removeView(newView);
+                    String tempTags = txtChipTag.getText().toString();
+
+                    File file = new File(data.getData().getPath());
+                    Intent i = new Intent(getApplicationContext(), ResultActivity.class);
+                    i.putExtra("str_tag", tempTags);
+                    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(i);
+                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_left);
                 }
             });
-            tvName.setText(tagList.get(i));
+            txtChipTag.setText(tagList.get(i));
             adjustableLayout.addingMultipleView(newView);
         }
         adjustableLayout.invalidateView();

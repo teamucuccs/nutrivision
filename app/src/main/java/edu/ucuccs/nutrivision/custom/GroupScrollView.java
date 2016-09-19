@@ -8,7 +8,7 @@ import android.widget.ScrollView;
 
 public class GroupScrollView extends ScrollView {
 
-    private static final int maxHeight = 100;
+    private static final int maxHeight = 300;
 
     public GroupScrollView(Context context) {
         super(context);
