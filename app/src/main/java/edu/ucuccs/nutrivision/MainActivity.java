@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -14,6 +15,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.clarifai.api.ClarifaiClient;
 import com.clarifai.api.RecognitionRequest;
@@ -38,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private final ClarifaiClient client = new ClarifaiClient(Credentials.CLARIFAI.CLIENT_ID, Credentials.CLARIFAI.CLIENT_SECRET);
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int CODE_PICK = 1;
+    private static final int CAMERA_RQ = 2;
     private Intent data;
 
     private final List<String> tagsListInitial = new ArrayList<>();
@@ -55,12 +58,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mToolbar        = (Toolbar) findViewById(R.id.toolbar);
-        mFabCam         = (FloatingActionButton) findViewById(R.id.menu_camera);
-        mFabBrowse      = (FloatingActionButton) findViewById(R.id.menu_browse);
-        fabMenu         = (FloatingActionMenu)findViewById(R.id.fab_menu);
-        imgResult       = (ImageView) findViewById(R.id.img_result);
-        mLblResultTags  = (TextView) findViewById(R.id.lbl_result_tag);
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        mFabCam = (FloatingActionButton) findViewById(R.id.menu_camera);
+        mFabBrowse = (FloatingActionButton) findViewById(R.id.menu_browse);
+        fabMenu = (FloatingActionMenu) findViewById(R.id.fab_menu);
+        imgResult = (ImageView) findViewById(R.id.img_result);
+        mLblResultTags = (TextView) findViewById(R.id.lbl_result_tag);
 
         mLinearEmpty = (LinearLayout) findViewById(R.id.layout_empty_state);
 
@@ -83,14 +86,15 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    void setUpToolbar(){
+    void setUpToolbar() {
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public void cameraShot() {
-
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        startActivityForResult(intent, CAMERA_RQ);
     }
 
     public void browseGallery() {
@@ -98,8 +102,42 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intent, CODE_PICK);
     }
 
-    @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == CAMERA_RQ && resultCode == RESULT_OK) {
+                this.data = data;
+                mLinearEmpty.setVisibility(View.GONE);
+                Log.d(TAG, "onActivityResult: ");
+
+                final Bitmap bitmap = loadBitmapFromUri(data.getData());
+                if (bitmap != null) {
+                    imgResult.setImageBitmap(bitmap);
+                    mLblResultTags.setText("Recognizing...");
+
+                    new AsyncTask<Bitmap, Void, RecognitionResult>() {
+                        @Override
+                        protected RecognitionResult doInBackground(Bitmap... bitmaps) {
+                            Log.d(TAG, "doInBackground: " + bitmaps[0]);
+                            return recognizeBitmap(bitmaps[0]);
+                        }
+
+                        @Override
+                        protected void onPostExecute(RecognitionResult result) {
+                            Log.d(TAG, "onPostExecute: " + result);
+                            updateUIForResult(result);
+                        }
+                    }.execute(bitmap);
+                }
+                else if(resultCode == RESULT_CANCELED){
+                    Toast.makeText(getApplicationContext(),
+                            "User cancelled image capture", Toast.LENGTH_SHORT)
+                            .show();
+                }else {
+                    mLblResultTags.setText("Unable to load captured image.");
+            }
+        }
         if (requestCode == CODE_PICK && resultCode == RESULT_OK) {
             this.data = data;
             mLinearEmpty.setVisibility(View.GONE);
@@ -111,11 +149,14 @@ public class MainActivity extends AppCompatActivity {
                 mLblResultTags.setText("Recognizing...");
 
                 new AsyncTask<Bitmap, Void, RecognitionResult>() {
-                    @Override protected RecognitionResult doInBackground(Bitmap... bitmaps) {
-                        Log.d(TAG, "doInBackground: "  + bitmaps[0]);
+                    @Override
+                    protected RecognitionResult doInBackground(Bitmap... bitmaps) {
+                        Log.d(TAG, "doInBackground: " + bitmaps[0]);
                         return recognizeBitmap(bitmaps[0]);
                     }
-                    @Override protected void onPostExecute(RecognitionResult result) {
+
+                    @Override
+                    protected void onPostExecute(RecognitionResult result) {
                         Log.d(TAG, "onPostExecute: " + result);
                         updateUIForResult(result);
                     }
@@ -125,6 +166,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
     private Bitmap loadBitmapFromUri(Uri uri) {
         try {
             BitmapFactory.Options opts = new BitmapFactory.Options();
@@ -179,13 +221,14 @@ public class MainActivity extends AppCompatActivity {
             mLblResultTags.setText("Sorry, there was an error recognizing your image.");
         }
     }
+
     private void addChipsViewFinal(List<String> tagList) {
         adjustableLayout = (AdjustableLayout) findViewById(R.id.container);
         adjustableLayout.removeAllViews();
         for (int i = 0; i < tagList.size(); i++) {
-            final View newView          = LayoutInflater.from(this).inflate(R.layout.layout_view_chip_text, null);
-            LinearLayout linearChipTag  = (LinearLayout) newView.findViewById(R.id.linear_chip_tag);
-            final TextView txtChipTag         = (TextView) newView.findViewById(R.id.txt_chip_content);
+            final View newView = LayoutInflater.from(this).inflate(R.layout.layout_view_chip_text, null);
+            LinearLayout linearChipTag = (LinearLayout) newView.findViewById(R.id.linear_chip_tag);
+            final TextView txtChipTag = (TextView) newView.findViewById(R.id.txt_chip_content);
 
             linearChipTag.setOnClickListener(new View.OnClickListener() {
                 @Override

@@ -11,8 +11,8 @@ class Credentials {
     public String  nutrionixURL;
 
     public interface CLARIFAI {
-        String CLIENT_ID = "F5fbBfo8MZtjMeeNWn_Fc9pC-u97usHofgiNz5tp";
-        String CLIENT_SECRET = "IhQv11zTu7slc_SQ9YTVdrKz40ufVPIzm2noKnkp";
+        String CLIENT_ID = "pB5Pk5fxJBp5ayc9ag193nedFRB3eWIRhLohRsbi";
+        String CLIENT_SECRET = "j7eZYHcmI4CDo1MqazWWYKvcESm-NdXaL-woHjjI";
     }
     public interface NUTRIONIX {
         String APP_ID = "f8d8df72";
