@@ -35,6 +35,8 @@ import static android.provider.MediaStore.Images.Media;
 
 public class MainActivity extends AppCompatActivity {
 
+    //Test
+
     private final ClarifaiClient client = new ClarifaiClient(Credentials.CLARIFAI.CLIENT_ID, Credentials.CLARIFAI.CLIENT_SECRET);
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int CODE_PICK = 1;
