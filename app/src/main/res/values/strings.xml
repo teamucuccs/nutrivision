@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">NutriVision</string>
 
+    <string name="fab_str_scan">Scan Barcode</string>
     <string name="fab_str_browse">Browse Photo</string>
     <string name="fab_str_capture">Open Camera</string>
     <string name="fab_str_speak">Speak</string>

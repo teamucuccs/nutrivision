@@ -47,7 +47,7 @@
                     android:layout_height="22dp"
                     android:layout_gravity="end"
                     android:layout_weight="1"
-                    android:background="@android:color/transparent"
+                    android:background="@android:color/white"
                     android:paddingBottom="25dp"
                     android:paddingEnd="15dp"
                     android:paddingLeft="25dp"
