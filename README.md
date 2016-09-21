@@ -1,5 +1,5 @@
-# nutrivision
-A simple food-photo nutrients analysis program
+# Nutrivision
+A simple food-photo nutrients analysis program developed as an entry for [GDG Android Masters] (http://androidmasters.gdgph.org/) Android App Development
 
 
 # Project
