@@ -62,12 +62,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mToolbar        = (Toolbar) findViewById(R.id.toolbar);
-        mFabCam         = (FloatingActionButton) findViewById(R.id.menu_camera);
-        mFabBrowse      = (FloatingActionButton) findViewById(R.id.menu_browse);
-        fabMenu         = (FloatingActionMenu)findViewById(R.id.fab_menu);
-        imgResult       = (ImageView) findViewById(R.id.img_result);
-        mLblResultTags  = (TextView) findViewById(R.id.lbl_result_tag);
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        mFabCam = (FloatingActionButton) findViewById(R.id.menu_camera);
+        mFabBrowse = (FloatingActionButton) findViewById(R.id.menu_browse);
+        fabMenu = (FloatingActionMenu) findViewById(R.id.fab_menu);
+        imgResult = (ImageView) findViewById(R.id.img_result);
+        mLblResultTags = (TextView) findViewById(R.id.lbl_result_tag);
 
         mLinearEmpty = (LinearLayout) findViewById(R.id.layout_empty_state);
 
@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    void setUpToolbar(){
+    void setUpToolbar() {
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
     }
@@ -124,10 +124,12 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intent, CODE_PICK);
     }
 
-    @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         this.data = data;
         mLinearEmpty.setVisibility(View.GONE);
+
         if (requestCode == CODE_PICK && resultCode == RESULT_OK) {
             final Bitmap bitmap = loadBitmapFromUri(data.getData());
             if (bitmap != null) {
@@ -146,7 +148,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -218,13 +219,14 @@ public class MainActivity extends AppCompatActivity {
             mLblResultTags.setText("Sorry, there was an error recognizing your image.");
         }
     }
+
     private void addChipsViewFinal(List<String> tagList) {
         adjustableLayout = (AdjustableLayout) findViewById(R.id.container);
         adjustableLayout.removeAllViews();
         for (int i = 0; i < tagList.size(); i++) {
-            final View newView          = LayoutInflater.from(this).inflate(R.layout.layout_view_chip_text, null);
-            LinearLayout linearChipTag  = (LinearLayout) newView.findViewById(R.id.linear_chip_tag);
-            final TextView txtChipTag         = (TextView) newView.findViewById(R.id.txt_chip_content);
+            final View newView = LayoutInflater.from(this).inflate(R.layout.layout_view_chip_text, null);
+            LinearLayout linearChipTag = (LinearLayout) newView.findViewById(R.id.linear_chip_tag);
+            final TextView txtChipTag = (TextView) newView.findViewById(R.id.txt_chip_content);
 
             linearChipTag.setOnClickListener(new View.OnClickListener() {
                 @Override
