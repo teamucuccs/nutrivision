@@ -1,6 +1,7 @@
 package edu.ucuccs.nutrivision;
 
 import android.Manifest;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -8,6 +9,8 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.speech.RecognizerIntent;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -20,6 +23,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.clarifai.api.ClarifaiClient;
 import com.clarifai.api.RecognitionRequest;
 import com.clarifai.api.RecognitionResult;
@@ -33,6 +38,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import edu.ucuccs.nutrivision.custom.AdjustableLayout;
 
@@ -45,10 +51,14 @@ public class MainActivity extends AppCompatActivity {
     private static final int CODE_PICK = 1;
     private static final int CODE_SHOT = 2;
     private static final int REQUEST_SHOT = 3;
+    private static final int CODE_SPEAK = 4;
     private Intent data;
 
+    private MaterialDialog.Builder materialDialog;
+    private MaterialDialog mDialog;
+
     private final List<String> tagsListInitial = new ArrayList<>();
-    private FloatingActionButton mFabCam, mFabBrowse;
+    private FloatingActionButton mFabCam, mFabBrowse, mFabSpeak;
     private FloatingActionMenu fabMenu;
     private AdjustableLayout adjustableLayout;
     private TextView mLblResultTags;
@@ -65,11 +75,15 @@ public class MainActivity extends AppCompatActivity {
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         mFabCam = (FloatingActionButton) findViewById(R.id.menu_camera);
         mFabBrowse = (FloatingActionButton) findViewById(R.id.menu_browse);
+        mFabSpeak = (FloatingActionButton) findViewById(R.id.menu_speak);
         fabMenu = (FloatingActionMenu) findViewById(R.id.fab_menu);
         imgResult = (ImageView) findViewById(R.id.img_result);
         mLblResultTags = (TextView) findViewById(R.id.lbl_result_tag);
 
         mLinearEmpty = (LinearLayout) findViewById(R.id.layout_empty_state);
+
+        materialDialog = new MaterialDialog.Builder(this);
+        mDialog = materialDialog.build();
 
         setUpToolbar();
 
@@ -85,6 +99,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 browseGallery();
+                fabMenu.close(true);
+            }
+        });
+
+        mFabSpeak.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                speechText();
                 fabMenu.close(true);
             }
         });
@@ -124,6 +146,23 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intent, CODE_PICK);
     }
 
+    public void speechText(){
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
+                getString(R.string.speech_prompt));
+
+        try {
+            startActivityForResult(intent, CODE_SPEAK);
+        } catch (ActivityNotFoundException a) {
+            Toast.makeText(getApplicationContext(),
+                    getString(R.string.speech_not_supported),
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -146,6 +185,31 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 mLblResultTags.setText("Unable to load selected image.");
             }
+        }else if (requestCode == CODE_SPEAK && resultCode == RESULT_OK && null != data){
+            final ArrayList<String> result = data
+                    .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+
+
+                    materialDialog.title(result.get(0))
+                    .content("Is this the word you spoken?")
+                    .positiveText("Yes")
+                    .negativeText("No")
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            Intent i = new Intent(getApplicationContext(), ResultActivity.class);
+                            i.putExtra("str_tag", result.get(0));
+                            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(i);
+                        }
+                    })
+                    .onNegative(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            mDialog.dismiss();
+                        }
+                    }).show();
+
         }
     }
     @Override
