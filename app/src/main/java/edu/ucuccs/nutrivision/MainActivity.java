@@ -1,11 +1,15 @@
 package edu.ucuccs.nutrivision;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -14,6 +18,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.clarifai.api.ClarifaiClient;
 import com.clarifai.api.RecognitionRequest;
@@ -38,6 +43,8 @@ public class MainActivity extends AppCompatActivity {
     private final ClarifaiClient client = new ClarifaiClient(Credentials.CLARIFAI.CLIENT_ID, Credentials.CLARIFAI.CLIENT_SECRET);
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int CODE_PICK = 1;
+    private static final int CODE_SHOT = 2;
+    private static final int REQUEST_SHOT = 3;
     private Intent data;
 
     private final List<String> tagsListInitial = new ArrayList<>();
@@ -88,11 +95,30 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowHomeEnabled(true);
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     public void cameraShot() {
-
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            final Intent intent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+            startActivityForResult(intent, CODE_SHOT);
+        }else{
+            requestPermission();
+        }
     }
-
+    void requestPermission(){
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, REQUEST_SHOT);
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_SHOT: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    cameraShot();
+                } else {
+                    Utils.showToast("You need to allow permission in order to capture images.", Toast.LENGTH_LONG);
+                }
+                return;
+            }
+        }
+    }
     public void browseGallery() {
         final Intent intent = new Intent(Intent.ACTION_PICK, Media.EXTERNAL_CONTENT_URI);
         startActivityForResult(intent, CODE_PICK);
@@ -100,30 +126,43 @@ public class MainActivity extends AppCompatActivity {
 
     @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        this.data = data;
+        mLinearEmpty.setVisibility(View.GONE);
         if (requestCode == CODE_PICK && resultCode == RESULT_OK) {
-            this.data = data;
-            mLinearEmpty.setVisibility(View.GONE);
-            Log.d(TAG, "onActivityResult: ");
-
             final Bitmap bitmap = loadBitmapFromUri(data.getData());
             if (bitmap != null) {
                 imgResult.setImageBitmap(bitmap);
-                mLblResultTags.setText("Recognizing...");
-
-                new AsyncTask<Bitmap, Void, RecognitionResult>() {
-                    @Override protected RecognitionResult doInBackground(Bitmap... bitmaps) {
-                        Log.d(TAG, "doInBackground: "  + bitmaps[0]);
-                        return recognizeBitmap(bitmaps[0]);
-                    }
-                    @Override protected void onPostExecute(RecognitionResult result) {
-                        Log.d(TAG, "onPostExecute: " + result);
-                        updateUIForResult(result);
-                    }
-                }.execute(bitmap);
+                callClarifai(bitmap);
+            } else {
+                mLblResultTags.setText("Unable to load selected image.");
+            }
+        }else if(requestCode == CODE_SHOT && resultCode == RESULT_OK){
+            final Bitmap bitmap = (Bitmap) data.getExtras().get("data");
+            if (bitmap != null) {
+                imgResult.setImageBitmap(bitmap);
+                callClarifai(bitmap);
             } else {
                 mLblResultTags.setText("Unable to load selected image.");
             }
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
+    void callClarifai(Bitmap bitmap){
+        mLblResultTags.setText("Recognizing...");
+        new AsyncTask<Bitmap, Void, RecognitionResult>() {
+            @Override protected RecognitionResult doInBackground(Bitmap... bitmaps) {
+                Log.d(TAG, "doInBackground: "  + bitmaps[0]);
+                return recognizeBitmap(bitmaps[0]);
+            }
+            @Override protected void onPostExecute(RecognitionResult result) {
+                Log.d(TAG, "onPostExecute: " + result);
+                updateUIForResult(result);
+            }
+        }.execute(bitmap);
     }
     private Bitmap loadBitmapFromUri(Uri uri) {
         try {
