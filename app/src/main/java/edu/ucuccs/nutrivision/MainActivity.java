@@ -11,6 +11,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.support.annotation.NonNull;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -34,7 +36,6 @@ import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,12 +61,19 @@ public class MainActivity extends AppCompatActivity {
     private final List<String> tagsListInitial = new ArrayList<>();
     private FloatingActionButton mFabCam, mFabBrowse, mFabSpeak;
     private FloatingActionMenu fabMenu;
+
     private AdjustableLayout adjustableLayout;
+    private CoordinatorLayout layoutRoot;
     private TextView mLblResultTags;
+    private TextView mLblEmptyState;
+
     private ImageView imgResult;
+    private ImageView imgEmptyState;
+
     private Toolbar mToolbar;
 
     private LinearLayout mLinearEmpty;
+    NetworkConnectivity mNetConn = new NetworkConnectivity(getApplicationContext());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +87,8 @@ public class MainActivity extends AppCompatActivity {
         fabMenu = (FloatingActionMenu) findViewById(R.id.fab_menu);
         imgResult = (ImageView) findViewById(R.id.img_result);
         mLblResultTags = (TextView) findViewById(R.id.lbl_result_tag);
+        mLblEmptyState = (TextView) findViewById(R.id.lbl_empty_state);
+        imgEmptyState = (ImageView) findViewById(R.id.img_empty_state);
 
         mLinearEmpty = (LinearLayout) findViewById(R.id.layout_empty_state);
 
@@ -167,50 +177,57 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         this.data = data;
-        mLinearEmpty.setVisibility(View.GONE);
 
-        if (requestCode == CODE_PICK && resultCode == RESULT_OK) {
-            final Bitmap bitmap = loadBitmapFromUri(data.getData());
-            if (bitmap != null) {
-                imgResult.setImageBitmap(bitmap);
-                callClarifai(bitmap);
-            } else {
-                mLblResultTags.setText("Unable to load selected image.");
+        if(mNetConn.isConnectedToInternet()){
+            if (requestCode == CODE_PICK && resultCode == RESULT_OK) {
+                mLinearEmpty.setVisibility(View.GONE);
+                final Bitmap bitmap = loadBitmapFromUri(data.getData());
+                if (bitmap != null) {
+                    imgResult.setImageBitmap(bitmap);
+                    callClarifai(bitmap);
+                } else {
+                    mLblResultTags.setText("Unable to load selected image.");
+                }
+            }else if(requestCode == CODE_SHOT && resultCode == RESULT_OK){
+                final Bitmap bitmap = (Bitmap) data.getExtras().get("data");
+                if (bitmap != null) {
+                    imgResult.setImageBitmap(bitmap);
+                    callClarifai(bitmap);
+                } else {
+                    mLblResultTags.setText("Unable to load selected image.");
+                }
+            }else if (requestCode == CODE_SPEAK && resultCode == RESULT_OK && null != data){
+                mLinearEmpty.setVisibility(View.GONE);
+                final ArrayList<String> result = data
+                        .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                materialDialog.title(result.get(0))
+                        .content("Is this correct?")
+                        .positiveText("Submit")
+                        .negativeText("Cancel")
+                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                Intent i = new Intent(getApplicationContext(), ResultActivity.class);
+                                i.putExtra("str_tag", result.get(0));
+                                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(i);
+                            }
+                        })
+                        .onNegative(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                mDialog.dismiss();
+                            }
+                        }).show();
+
             }
-        }else if(requestCode == CODE_SHOT && resultCode == RESULT_OK){
-            final Bitmap bitmap = (Bitmap) data.getExtras().get("data");
-            if (bitmap != null) {
-                imgResult.setImageBitmap(bitmap);
-                callClarifai(bitmap);
-            } else {
-                mLblResultTags.setText("Unable to load selected image.");
-            }
-        }else if (requestCode == CODE_SPEAK && resultCode == RESULT_OK && null != data){
-            final ArrayList<String> result = data
-                    .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-
-
-                    materialDialog.title(result.get(0))
-                    .content("Is this the word you spoken?")
-                    .positiveText("Yes")
-                    .negativeText("No")
-                    .onPositive(new MaterialDialog.SingleButtonCallback() {
-                        @Override
-                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                            Intent i = new Intent(getApplicationContext(), ResultActivity.class);
-                            i.putExtra("str_tag", result.get(0));
-                            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(i);
-                        }
-                    })
-                    .onNegative(new MaterialDialog.SingleButtonCallback() {
-                        @Override
-                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                            mDialog.dismiss();
-                        }
-                    }).show();
-
+        }else{
+            showNoConnectionState();
         }
+    }
+    void showNoConnectionState(){
+        imgEmptyState.setImageResource(R.drawable.ic_cloud_off_black_24dp);
+        mLblEmptyState.setText(R.string.msg_no_connection);
     }
     @Override
     protected void onDestroy() {
@@ -283,7 +300,13 @@ public class MainActivity extends AppCompatActivity {
             mLblResultTags.setText("Sorry, there was an error recognizing your image.");
         }
     }
-
+    void submitTag(String tag){
+        Intent i = new Intent(getApplicationContext(), ResultActivity.class);
+        i.putExtra("str_tag", tag);
+        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(i);
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_left);
+    }
     private void addChipsViewFinal(List<String> tagList) {
         adjustableLayout = (AdjustableLayout) findViewById(R.id.container);
         adjustableLayout.removeAllViews();
@@ -295,14 +318,22 @@ public class MainActivity extends AppCompatActivity {
             linearChipTag.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    String tempTags = txtChipTag.getText().toString();
 
-                    File file = new File(data.getData().getPath());
-                    Intent i = new Intent(getApplicationContext(), ResultActivity.class);
-                    i.putExtra("str_tag", tempTags);
-                    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(i);
-                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_left);
+                    final String tempTags = txtChipTag.getText().toString();
+                    if(mNetConn.isConnectedToInternet()){
+                        submitTag(tempTags);
+                    }else{
+                        Utils.showSnackBar("Can't connect right now", layoutRoot, Toast.LENGTH_LONG);
+                        Snackbar snackbar = Snackbar.make(layoutRoot, R.string.msg_no_connection_short, Snackbar.LENGTH_LONG)
+                                .setAction(R.string.action_retry, new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        submitTag(tempTags);
+                                    }
+                                });
+                        snackbar.setDuration(Snackbar.LENGTH_INDEFINITE);
+                        snackbar.show();
+                    }
                 }
             });
             txtChipTag.setText(tagList.get(i));

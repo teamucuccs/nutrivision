@@ -1,8 +1,9 @@
 /**
- * Author: Aljohn De Guzman on 09/07/2016.
- * Website: http://ajdeguzman.x10.mx
- * E-mail: aljohndeguzman@gmail.com
+ * Author: UCU Knight Coders on 9/07/2016.
+ * Website: http://facebook.com/teamucuccs
+ * E-mail: teamucuccs@gmail.com
  */
+
 
 package edu.ucuccs.nutrivision;
 

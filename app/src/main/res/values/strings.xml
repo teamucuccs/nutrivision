@@ -14,4 +14,9 @@
     <string name="speech_prompt">Say something&#8230;</string>
     <string name="speech_tap">Tap on mic to speak</string>
     <string name="speech_not_supported">Sorry! Your device doesn\'t support speech input</string>
+
+    <string name="msg_no_connection">No connection detected. Please try again.</string>
+    <string name="msg_no_connection_short">"Can't connect right now"</string>
+
+    <string name="action_retry">Retry</string>
 </resources>

@@ -8,13 +8,15 @@
     android:id="@+id/layout_empty_state">
 
             <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:id="@+id/img_empty_state"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
                 android:layout_gravity="center_horizontal"
                 android:src="@drawable/empty_img_recent"
                 android:tint="#CCCCCC" />
 
             <TextView
+                android:id="@+id/lbl_empty_state"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceMedium"
