@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
     private Toolbar mToolbar;
 
     private LinearLayout mLinearEmpty;
-    NetworkConnectivity mNetConn = new NetworkConnectivity(getApplicationContext());
+    NetworkConnectivity mNetConn = new NetworkConnectivity(MainActivity.this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -197,8 +197,8 @@ public class MainActivity extends AppCompatActivity {
                 mLinearEmpty.setVisibility(View.GONE);
                 final ArrayList<String> result = data
                         .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                confirmTextDialog.setTitle(result.get(0))
-                        .setMessage("Is this correct?")
+                confirmTextDialog.setTitle("Is this correct?")
+                        .setMessage(result.get(0))
                         .setPositiveButton("Submit", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {

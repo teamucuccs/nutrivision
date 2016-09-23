@@ -65,6 +65,7 @@
                android:id="@+id/recyFoods"
                android:layout_width="match_parent"
                android:layout_height="match_parent"
+               app:layout_behavior="@string/appbar_scrolling_view_behavior"
                app:layoutManager="android.support.v7.widget.LinearLayoutManager" />
        </LinearLayout>
 
