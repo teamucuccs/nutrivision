@@ -2,6 +2,7 @@ package edu.ucuccs.nutrivision;
 
 import android.Manifest;
 import android.content.ActivityNotFoundException;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -10,11 +11,11 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
-import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -25,8 +26,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.afollestad.materialdialogs.DialogAction;
-import com.afollestad.materialdialogs.MaterialDialog;
 import com.clarifai.api.ClarifaiClient;
 import com.clarifai.api.RecognitionRequest;
 import com.clarifai.api.RecognitionResult;
@@ -55,8 +54,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int CODE_SPEAK = 4;
     private Intent data;
 
-    private MaterialDialog.Builder materialDialog;
-    private MaterialDialog mDialog;
+    private AlertDialog.Builder confirmTextDialog;
 
     private final List<String> tagsListInitial = new ArrayList<>();
     private FloatingActionButton mFabCam, mFabBrowse, mFabSpeak;
@@ -92,8 +90,7 @@ public class MainActivity extends AppCompatActivity {
 
         mLinearEmpty = (LinearLayout) findViewById(R.id.layout_empty_state);
 
-        materialDialog = new MaterialDialog.Builder(this);
-        mDialog = materialDialog.build();
+        confirmTextDialog = new AlertDialog.Builder(this);
 
         setUpToolbar();
 
@@ -200,23 +197,21 @@ public class MainActivity extends AppCompatActivity {
                 mLinearEmpty.setVisibility(View.GONE);
                 final ArrayList<String> result = data
                         .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                materialDialog.title(result.get(0))
-                        .content("Is this correct?")
-                        .positiveText("Submit")
-                        .negativeText("Cancel")
-                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                confirmTextDialog.setTitle(result.get(0))
+                        .setMessage("Is this correct?")
+                        .setPositiveButton("Submit", new DialogInterface.OnClickListener() {
                             @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            public void onClick(DialogInterface dialog, int which) {
                                 Intent i = new Intent(getApplicationContext(), ResultActivity.class);
                                 i.putExtra("str_tag", result.get(0));
                                 i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                 startActivity(i);
                             }
                         })
-                        .onNegative(new MaterialDialog.SingleButtonCallback() {
+                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                             @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                mDialog.dismiss();
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
                             }
                         }).show();
 
