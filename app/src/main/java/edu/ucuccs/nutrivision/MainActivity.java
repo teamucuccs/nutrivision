@@ -1,7 +1,9 @@
 package edu.ucuccs.nutrivision;
 
 import android.Manifest;
+import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -17,9 +19,13 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -42,6 +48,7 @@ import java.util.Locale;
 
 import edu.ucuccs.nutrivision.custom.AdjustableLayout;
 
+import static android.R.attr.id;
 import static android.provider.MediaStore.Images.Media;
 
 public class MainActivity extends AppCompatActivity {
@@ -57,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
     private AlertDialog.Builder confirmTextDialog;
 
     private final List<String> tagsListInitial = new ArrayList<>();
-    private FloatingActionButton mFabCam, mFabBrowse, mFabSpeak;
+    private FloatingActionButton mFabCam, mFabBrowse, mFabSpeak, mFabSearch;
     private FloatingActionMenu fabMenu;
 
     private AdjustableLayout adjustableLayout;
@@ -82,6 +89,7 @@ public class MainActivity extends AppCompatActivity {
         mFabCam = (FloatingActionButton) findViewById(R.id.menu_camera);
         mFabBrowse = (FloatingActionButton) findViewById(R.id.menu_browse);
         mFabSpeak = (FloatingActionButton) findViewById(R.id.menu_speak);
+        mFabSearch = (FloatingActionButton) findViewById(R.id.menu_search);
         fabMenu = (FloatingActionMenu) findViewById(R.id.fab_menu);
         imgResult = (ImageView) findViewById(R.id.img_result);
         mLblResultTags = (TextView) findViewById(R.id.lbl_result_tag);
@@ -93,6 +101,8 @@ public class MainActivity extends AppCompatActivity {
         confirmTextDialog = new AlertDialog.Builder(this);
 
         setUpToolbar();
+
+        handleIntent(getIntent());
 
         mFabCam.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -117,11 +127,24 @@ public class MainActivity extends AppCompatActivity {
                 fabMenu.close(true);
             }
         });
+
+        mFabSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                search();
+                fabMenu.close(true);
+            }
+        });
     }
 
     void setUpToolbar() {
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        handleIntent(intent);
     }
 
     public void cameraShot() {
@@ -170,6 +193,22 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void search(){
+
+    }
+
+    private void handleIntent(Intent intent){
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            String query = intent.getStringExtra(SearchManager.QUERY);
+
+            Intent i = new Intent(getApplicationContext(), ResultActivity.class);
+            i.putExtra("str_tag", query);
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(i);
+            //use the query to search your data somehow
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -213,7 +252,14 @@ public class MainActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.dismiss();
                             }
-                        }).show();
+                        })
+                        .setNeutralButton("Retry", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                speechText();
+                            }
+                        })
+                        .show();
 
             }
         }else{
@@ -335,6 +381,19 @@ public class MainActivity extends AppCompatActivity {
             adjustableLayout.addingMultipleView(newView);
         }
         adjustableLayout.invalidateView();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.options_menu, menu);
+
+        // Associate searchable configuration with the SearchView
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
+        searchView.setSearchableInfo( searchManager.getSearchableInfo(getComponentName()) );
+
+        return true;
     }
 
 }
