@@ -48,10 +48,9 @@ import java.util.Locale;
 
 import edu.ucuccs.nutrivision.custom.AdjustableLayout;
 
-import static android.R.attr.id;
 import static android.provider.MediaStore.Images.Media;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity{
 
     private final ClarifaiClient client = new ClarifaiClient(Credentials.CLARIFAI.CLIENT_ID, Credentials.CLARIFAI.CLIENT_SECRET);
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -60,6 +59,8 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_SHOT = 3;
     private static final int CODE_SPEAK = 4;
     private Intent data;
+
+    private MenuItem item;
 
     private AlertDialog.Builder confirmTextDialog;
 
@@ -194,7 +195,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void search(){
-
+        item.expandActionView();
     }
 
     private void handleIntent(Intent intent){
@@ -205,7 +206,6 @@ public class MainActivity extends AppCompatActivity {
             i.putExtra("str_tag", query);
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(i);
-            //use the query to search your data somehow
         }
     }
 
@@ -387,15 +387,13 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.options_menu, menu);
+        getMenuInflater().inflate(R.menu.options_menu, menu);
+        MenuItem mMenuSearch = menu.findItem(R.id.search);
+        this.item = mMenuSearch;
 
-        // Associate searchable configuration with the SearchView
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
         searchView.setSearchableInfo( searchManager.getSearchableInfo(getComponentName()) );
-
         return true;
     }
-
 }
