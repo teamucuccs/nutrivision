@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -37,6 +38,8 @@ import com.clarifai.api.RecognitionRequest;
 import com.clarifai.api.RecognitionResult;
 import com.clarifai.api.Tag;
 import com.clarifai.api.exception.ClarifaiException;
+import com.getkeepsafe.taptargetview.TapTarget;
+import com.getkeepsafe.taptargetview.TapTargetView;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 
@@ -136,6 +139,23 @@ public class MainActivity extends AppCompatActivity{
                 fabMenu.close(true);
             }
         });
+        featureDiscovery();
+    }
+
+    void featureDiscovery(){
+        TapTargetView.showFor(this, TapTarget.forView(findViewById(R.id.fabTemp), "This is the Action Button", "Browse, search, take pictures and instantly receive results")
+                        .textColor(android.R.color.white)
+                        .dimColor(android.R.color.black)
+                        .drawShadow(true)
+                        .cancelable(true)
+                        .tintTarget(false),
+                new TapTargetView.Listener() {
+                    @Override
+                    public void onTargetClick(TapTargetView view) {
+                        super.onTargetClick(view);
+
+                    }
+                });
     }
 
     void setUpToolbar() {

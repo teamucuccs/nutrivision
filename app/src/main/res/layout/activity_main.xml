@@ -30,9 +30,21 @@
             android:layout_height="wrap_content" />
 
     </LinearLayout>
+
     <FrameLayout
+        android:id="@+id/frameFab"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fabTemp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|right"
+            android:paddingBottom="20dp"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:src="@drawable/ic_add"
+            android:visibility="invisible"/>
 
         <com.github.clans.fab.FloatingActionMenu
             android:id="@+id/fab_menu"
