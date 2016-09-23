@@ -177,9 +177,9 @@ public class MainActivity extends AppCompatActivity {
 
         if(mNetConn.isConnectedToInternet()){
             if (requestCode == CODE_PICK && resultCode == RESULT_OK) {
-                mLinearEmpty.setVisibility(View.GONE);
                 final Bitmap bitmap = loadBitmapFromUri(data.getData());
                 if (bitmap != null) {
+                    mLinearEmpty.setVisibility(View.GONE);
                     imgResult.setImageBitmap(bitmap);
                     callClarifai(bitmap);
                 } else {
@@ -188,13 +188,13 @@ public class MainActivity extends AppCompatActivity {
             }else if(requestCode == CODE_SHOT && resultCode == RESULT_OK){
                 final Bitmap bitmap = (Bitmap) data.getExtras().get("data");
                 if (bitmap != null) {
+                    mLinearEmpty.setVisibility(View.GONE);
                     imgResult.setImageBitmap(bitmap);
                     callClarifai(bitmap);
                 } else {
                     mLblResultTags.setText("Unable to load selected image.");
                 }
             }else if (requestCode == CODE_SPEAK && resultCode == RESULT_OK && null != data){
-                mLinearEmpty.setVisibility(View.GONE);
                 final ArrayList<String> result = data
                         .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
                 confirmTextDialog.setTitle("Is this correct?")
@@ -216,6 +216,8 @@ public class MainActivity extends AppCompatActivity {
                         }).show();
 
             }
+        }else if(resultCode == RESULT_CANCELED){
+            mLinearEmpty.setVisibility(View.VISIBLE);
         }else{
             showNoConnectionState();
         }
