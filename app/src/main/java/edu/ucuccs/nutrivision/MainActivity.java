@@ -139,7 +139,7 @@ public class MainActivity extends AppCompatActivity{
                 fabMenu.close(true);
             }
         });
-        featureDiscovery();
+        //featureDiscovery();
     }
 
     void featureDiscovery(){
