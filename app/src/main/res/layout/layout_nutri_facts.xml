@@ -182,7 +182,7 @@
                         android:fontFamily="sans-serif-light"
                         android:layout_margin="3dp"
                         android:id="@+id/lblServings"
-                        android:layout_height="40dp" />
+                        android:layout_height="41dp" />
 
                     <TextView
                         android:layout_width="match_parent"
