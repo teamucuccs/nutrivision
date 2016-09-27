@@ -35,7 +35,6 @@ public class ResultActivity extends AppCompatActivity {
     private static final String TAG = ResultActivity.class.getSimpleName();
     private ProgressDialog pDialog;
     private RecyclerView recyFoods;
-    private String  tag_string_req = "string_req";
 
     private ArrayList<String> mArrayID= new ArrayList<>();
     private ArrayList<String> mArrayName = new ArrayList<>();
@@ -80,7 +79,6 @@ public class ResultActivity extends AppCompatActivity {
         pDialog.show();
 
         RequestQueue requestQueue = Volley.newRequestQueue(this);
-
         JsonObjectRequest obreq = new JsonObjectRequest(Request.Method.GET,  new Credentials().returnURL(mTagTitle),null, new Response.Listener<JSONObject>() {
 
                     @Override
@@ -115,7 +113,6 @@ public class ResultActivity extends AppCompatActivity {
                                 adapter.resetData(feedListContent(mArrayID));
                             }
                         }
-
                         catch (JSONException e) {
                             e.printStackTrace();
                         }
