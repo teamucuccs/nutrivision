@@ -43,7 +43,6 @@ public class ResultActivity extends AppCompatActivity {
     private ArrayList<String> mArrayFat = new ArrayList<>();
     private ArrayList<String> mArrayQty = new ArrayList<>();
     private ArrayList<String> mArrayUnit = new ArrayList<>();
-    String data="";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
