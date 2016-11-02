@@ -19,4 +19,13 @@
     <string name="msg_no_connection_short">"Can't connect right now"</string>
 
     <string name="action_retry">Retry</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_submit">Submit</string>
+
+    <string name="err_msg_unrecognized_image">Sorry, there was an error recognizing your image.</string>
+    <string name="err_msg_unable_to_load_image">Unable to load selected image.</string>
+    <string name="err_msg_cannot_connect">"Can't connect right now"</string>
+    <string name="info_msg_loading">Loading…</string>
+    <string name="confirm_msg_correct">"Is this correct?"</string>
+    <string name="info_allow_permission_capture">"You need to allow permission in order to capture images."</string>
 </resources>
