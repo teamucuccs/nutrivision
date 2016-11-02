@@ -3,16 +3,20 @@ package edu.ucuccs.nutrivision;
 import android.Manifest;
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.speech.RecognizerIntent;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
@@ -53,7 +57,7 @@ import edu.ucuccs.nutrivision.custom.AdjustableLayout;
 
 import static android.provider.MediaStore.Images.Media;
 
-public class MainActivity extends AppCompatActivity{
+public class MainActivity extends AppCompatActivity {
 
     private final ClarifaiClient client = new ClarifaiClient(Credentials.CLARIFAI.CLIENT_ID, Credentials.CLARIFAI.CLIENT_SECRET);
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -61,6 +65,7 @@ public class MainActivity extends AppCompatActivity{
     private static final int CODE_SHOT = 2;
     private static final int REQUEST_SHOT = 3;
     private static final int CODE_SPEAK = 4;
+    private static final int REQUEST_STORAGE = 5;
     private Intent data;
 
     private MenuItem item;
@@ -83,6 +88,17 @@ public class MainActivity extends AppCompatActivity{
 
     private LinearLayout mLinearEmpty;
     NetworkConnectivity mNetConn = new NetworkConnectivity(MainActivity.this);
+
+    private Uri imageUri;
+    private Bitmap thumbnail;
+
+    String[] PERMISSIONS = {
+            Manifest.permission.CAMERA,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.INTERNET,
+            Manifest.permission.ACCESS_NETWORK_STATE
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,6 +123,8 @@ public class MainActivity extends AppCompatActivity{
         setUpToolbar();
 
         handleIntent(getIntent());
+
+        grantPermissions();
 
         mFabCam.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -142,7 +160,7 @@ public class MainActivity extends AppCompatActivity{
         //featureDiscovery();
     }
 
-    void featureDiscovery(){
+    void featureDiscovery() {
         TapTargetView.showFor(this, TapTarget.forView(findViewById(R.id.fabTemp), "This is the Action Button", "Browse, search, take pictures and instantly receive results")
                         .textColor(android.R.color.white)
                         .dimColor(android.R.color.black)
@@ -163,6 +181,23 @@ public class MainActivity extends AppCompatActivity{
         getSupportActionBar().setDisplayShowHomeEnabled(true);
     }
 
+    void grantPermissions(){
+        if(!hasPermissions(getApplicationContext(), PERMISSIONS)) {
+            ActivityCompat.requestPermissions(MainActivity.this, PERMISSIONS, 1);
+        }
+    }
+
+    private static boolean hasPermissions(Context context, String...permissions){
+        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M && context!=null && permissions!=null){
+            for(String permission:permissions){
+                if(ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     @Override
     protected void onNewIntent(Intent intent) {
         handleIntent(intent);
@@ -170,15 +205,23 @@ public class MainActivity extends AppCompatActivity{
 
     public void cameraShot() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            ContentValues values = new ContentValues();
+            values.put(Media.TITLE, "Food Picture");
+            values.put(Media.DESCRIPTION, "From Camera");
+            imageUri = getContentResolver().insert(
+                    Media.EXTERNAL_CONTENT_URI, values);
             final Intent intent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
             startActivityForResult(intent, CODE_SHOT);
-        }else{
+        } else {
             requestPermission();
         }
     }
-    void requestPermission(){
+
+    void requestPermission() {
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, REQUEST_SHOT);
     }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
@@ -192,12 +235,13 @@ public class MainActivity extends AppCompatActivity{
             }
         }
     }
+
     public void browseGallery() {
         final Intent intent = new Intent(Intent.ACTION_PICK, Media.EXTERNAL_CONTENT_URI);
         startActivityForResult(intent, CODE_PICK);
     }
 
-    public void speechText(){
+    public void speechText() {
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
                 RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
@@ -214,11 +258,11 @@ public class MainActivity extends AppCompatActivity{
         }
     }
 
-    public void search(){
+    public void search() {
         item.expandActionView();
     }
 
-    private void handleIntent(Intent intent){
+    private void handleIntent(Intent intent) {
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
 
@@ -234,7 +278,7 @@ public class MainActivity extends AppCompatActivity{
         super.onActivityResult(requestCode, resultCode, data);
         this.data = data;
 
-        if(mNetConn.isConnectedToInternet()){
+        if (mNetConn.isConnectedToInternet()) {
             if (requestCode == CODE_PICK && resultCode == RESULT_OK) {
                 final Bitmap bitmap = loadBitmapFromUri(data.getData());
                 if (bitmap != null) {
@@ -244,16 +288,19 @@ public class MainActivity extends AppCompatActivity{
                 } else {
                     mLblResultTags.setText("Unable to load selected image.");
                 }
-            }else if(requestCode == CODE_SHOT && resultCode == RESULT_OK){
-                final Bitmap bitmap = (Bitmap) data.getExtras().get("data");
-                if (bitmap != null) {
+            } else if (requestCode == CODE_SHOT && resultCode == RESULT_OK) {
+                try {
                     mLinearEmpty.setVisibility(View.GONE);
-                    imgResult.setImageBitmap(bitmap);
-                    callClarifai(bitmap);
-                } else {
+                    thumbnail = MediaStore.Images.Media.getBitmap(
+                            getContentResolver(), imageUri);
+                    imgResult.setImageBitmap(thumbnail);
+                    callClarifai(thumbnail);
+                } catch (Exception e) {
                     mLblResultTags.setText("Unable to load selected image.");
+                    e.printStackTrace();
                 }
-            }else if (requestCode == CODE_SPEAK && resultCode == RESULT_OK && null != data){
+
+            } else if (requestCode == CODE_SPEAK && resultCode == RESULT_OK && null != data) {
                 final ArrayList<String> result = data
                         .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
                 confirmTextDialog.setTitle("Is this correct?")
@@ -282,33 +329,40 @@ public class MainActivity extends AppCompatActivity{
                         .show();
 
             }
-        }else if(resultCode == RESULT_CANCELED){
+        } else if (resultCode == RESULT_CANCELED) {
             mLinearEmpty.setVisibility(View.VISIBLE);
-        }else{
+        } else {
             showNoConnectionState();
         }
     }
-    void showNoConnectionState(){
+
+    void showNoConnectionState() {
         imgEmptyState.setImageResource(R.drawable.ic_cloud_off_black_24dp);
         mLblEmptyState.setText(R.string.msg_no_connection);
     }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
     }
-    void callClarifai(Bitmap bitmap){
+
+    void callClarifai(Bitmap bitmap) {
         mLblResultTags.setText("Recognizing...");
         new AsyncTask<Bitmap, Void, RecognitionResult>() {
-            @Override protected RecognitionResult doInBackground(Bitmap... bitmaps) {
-                Log.d(TAG, "doInBackground: "  + bitmaps[0]);
+            @Override
+            protected RecognitionResult doInBackground(Bitmap... bitmaps) {
+                Log.d(TAG, "doInBackground: " + bitmaps[0]);
                 return recognizeBitmap(bitmaps[0]);
             }
-            @Override protected void onPostExecute(RecognitionResult result) {
+
+            @Override
+            protected void onPostExecute(RecognitionResult result) {
                 Log.d(TAG, "onPostExecute: " + result);
                 updateUIForResult(result);
             }
         }.execute(bitmap);
     }
+
     private Bitmap loadBitmapFromUri(Uri uri) {
         try {
             BitmapFactory.Options opts = new BitmapFactory.Options();
@@ -363,13 +417,15 @@ public class MainActivity extends AppCompatActivity{
             mLblResultTags.setText("Sorry, there was an error recognizing your image.");
         }
     }
-    void submitTag(String tag){
+
+    void submitTag(String tag) {
         Intent i = new Intent(getApplicationContext(), ResultActivity.class);
         i.putExtra("str_tag", tag);
         i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(i);
         overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_left);
     }
+
     private void addChipsViewFinal(List<String> tagList) {
         adjustableLayout = (AdjustableLayout) findViewById(R.id.container);
         adjustableLayout.removeAllViews();
@@ -383,9 +439,9 @@ public class MainActivity extends AppCompatActivity{
                 public void onClick(View view) {
 
                     final String tempTags = txtChipTag.getText().toString();
-                    if(mNetConn.isConnectedToInternet()){
+                    if (mNetConn.isConnectedToInternet()) {
                         submitTag(tempTags);
-                    }else{
+                    } else {
                         Utils.showSnackBar("Can't connect right now", layoutRoot, Toast.LENGTH_LONG);
                         Snackbar snackbar = Snackbar.make(layoutRoot, R.string.msg_no_connection_short, Snackbar.LENGTH_LONG)
                                 .setAction(R.string.action_retry, new View.OnClickListener() {
@@ -413,7 +469,7 @@ public class MainActivity extends AppCompatActivity{
 
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
-        searchView.setSearchableInfo( searchManager.getSearchableInfo(getComponentName()) );
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         return true;
     }
 }

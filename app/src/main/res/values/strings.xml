@@ -2,10 +2,10 @@
     <string name="app_name">NutriVision</string>
 
     <string name="fab_str_scan">Scan Barcode</string>
-    <string name="fab_str_browse">Browse Photo</string>
-    <string name="fab_str_capture">Open Camera</string>
-    <string name="fab_str_speak">Speak</string>
-    <string name="fab_str_search">Search</string>
+    <string name="fab_str_browse">Browse Food Photo</string>
+    <string name="fab_str_capture">Capture Food</string>
+    <string name="fab_str_speak">Speak Food Name</string>
+    <string name="fab_str_search">Search Food</string>
 
     <string name="empty_str_recent">No recent activity. \nEnjoy your day!</string>
     <string name="title_activity_results">Result</string>
