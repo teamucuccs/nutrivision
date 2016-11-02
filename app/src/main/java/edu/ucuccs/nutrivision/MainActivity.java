@@ -11,7 +11,6 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -29,7 +28,6 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -61,11 +59,12 @@ public class MainActivity extends AppCompatActivity {
 
     private final ClarifaiClient client = new ClarifaiClient(Credentials.CLARIFAI.CLIENT_ID, Credentials.CLARIFAI.CLIENT_SECRET);
     private static final String TAG = MainActivity.class.getSimpleName();
-    private static final int CODE_PICK = 1;
-    private static final int CODE_SHOT = 2;
-    private static final int REQUEST_SHOT = 3;
-    private static final int CODE_SPEAK = 4;
-    private static final int REQUEST_STORAGE = 5;
+
+    private static final int CODE_PICK      = 1;
+    private static final int CODE_SHOT      = 2;
+    private static final int REQUEST_SHOT   = 3;
+    private static final int CODE_SPEAK     = 4;
+
     private Intent data;
 
     private MenuItem item;
@@ -73,10 +72,8 @@ public class MainActivity extends AppCompatActivity {
     private AlertDialog.Builder confirmTextDialog;
 
     private final List<String> tagsListInitial = new ArrayList<>();
-    private FloatingActionButton mFabCam, mFabBrowse, mFabSpeak, mFabSearch;
     private FloatingActionMenu fabMenu;
 
-    private AdjustableLayout adjustableLayout;
     private CoordinatorLayout layoutRoot;
     private TextView mLblResultTags;
     private TextView mLblEmptyState;
@@ -105,23 +102,20 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        mFabCam = (FloatingActionButton) findViewById(R.id.menu_camera);
-        mFabBrowse = (FloatingActionButton) findViewById(R.id.menu_browse);
-        mFabSpeak = (FloatingActionButton) findViewById(R.id.menu_speak);
-        mFabSearch = (FloatingActionButton) findViewById(R.id.menu_search);
-        fabMenu = (FloatingActionMenu) findViewById(R.id.fab_menu);
-        imgResult = (ImageView) findViewById(R.id.img_result);
-        mLblResultTags = (TextView) findViewById(R.id.lbl_result_tag);
-        mLblEmptyState = (TextView) findViewById(R.id.lbl_empty_state);
-        imgEmptyState = (ImageView) findViewById(R.id.img_empty_state);
+        mToolbar        = (Toolbar) findViewById(R.id.toolbar);
+        FloatingActionButton mFabCam = (FloatingActionButton) findViewById(R.id.menu_camera);
+        FloatingActionButton mFabBrowse = (FloatingActionButton) findViewById(R.id.menu_browse);
+        FloatingActionButton mFabSpeak = (FloatingActionButton) findViewById(R.id.menu_speak);
+        FloatingActionButton mFabSearch = (FloatingActionButton) findViewById(R.id.menu_search);
+        fabMenu         = (FloatingActionMenu) findViewById(R.id.fab_menu);
+        imgResult       = (ImageView) findViewById(R.id.img_result);
+        mLblResultTags  = (TextView) findViewById(R.id.lbl_result_tag);
+        mLblEmptyState  = (TextView) findViewById(R.id.lbl_empty_state);
+        imgEmptyState   = (ImageView) findViewById(R.id.img_empty_state);
 
         mLinearEmpty = (LinearLayout) findViewById(R.id.layout_empty_state);
-
         confirmTextDialog = new AlertDialog.Builder(this);
-
         setUpToolbar();
-
         handleIntent(getIntent());
 
         grantPermissions();
@@ -229,9 +223,8 @@ public class MainActivity extends AppCompatActivity {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     cameraShot();
                 } else {
-                    Utils.showToast("You need to allow permission in order to capture images.", Toast.LENGTH_LONG);
+                    Utils.showToast(getString(R.string.info_allow_permission_capture), Toast.LENGTH_LONG);
                 }
-                return;
             }
         }
     }
@@ -241,20 +234,17 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intent, CODE_PICK);
     }
 
-    public void speechText() {
-        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
-        intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
+    public void speechText(){
+        Intent mIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        mIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        mIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+        mIntent.putExtra(RecognizerIntent.EXTRA_PROMPT,
                 getString(R.string.speech_prompt));
 
         try {
-            startActivityForResult(intent, CODE_SPEAK);
+            startActivityForResult(mIntent, CODE_SPEAK);
         } catch (ActivityNotFoundException a) {
-            Toast.makeText(getApplicationContext(),
-                    getString(R.string.speech_not_supported),
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), getString(R.string.speech_not_supported), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -286,7 +276,7 @@ public class MainActivity extends AppCompatActivity {
                     imgResult.setImageBitmap(bitmap);
                     callClarifai(bitmap);
                 } else {
-                    mLblResultTags.setText("Unable to load selected image.");
+                    mLblResultTags.setText(R.string.err_msg_unable_to_load_image);
                 }
             } else if (requestCode == CODE_SHOT && resultCode == RESULT_OK) {
                 try {
@@ -303,9 +293,9 @@ public class MainActivity extends AppCompatActivity {
             } else if (requestCode == CODE_SPEAK && resultCode == RESULT_OK && null != data) {
                 final ArrayList<String> result = data
                         .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                confirmTextDialog.setTitle("Is this correct?")
+                        confirmTextDialog.setTitle(R.string.confirm_msg_correct)
                         .setMessage(result.get(0))
-                        .setPositiveButton("Submit", new DialogInterface.OnClickListener() {
+                        .setPositiveButton(R.string.action_submit, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 Intent i = new Intent(getApplicationContext(), ResultActivity.class);
@@ -314,13 +304,13 @@ public class MainActivity extends AppCompatActivity {
                                 startActivity(i);
                             }
                         })
-                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        .setNegativeButton(R.string.action_cancel, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.dismiss();
                             }
                         })
-                        .setNeutralButton("Retry", new DialogInterface.OnClickListener() {
+                        .setNeutralButton(R.string.action_retry, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 speechText();
@@ -346,8 +336,8 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
-    void callClarifai(Bitmap bitmap) {
-        mLblResultTags.setText("Recognizing...");
+    void callClarifai(Bitmap bitmap){
+        mLblResultTags.setText(R.string.info_msg_loading);
         new AsyncTask<Bitmap, Void, RecognitionResult>() {
             @Override
             protected RecognitionResult doInBackground(Bitmap... bitmaps) {
@@ -369,8 +359,7 @@ public class MainActivity extends AppCompatActivity {
             opts.inJustDecodeBounds = true;
             BitmapFactory.decodeStream(getContentResolver().openInputStream(uri), null, opts);
             int sampleSize = 1;
-            while (opts.outWidth / (2 * sampleSize) >= imgResult.getWidth() &&
-                    opts.outHeight / (2 * sampleSize) >= imgResult.getHeight()) {
+            while (opts.outWidth / (2 * sampleSize) >= imgResult.getWidth() && opts.outHeight / (2 * sampleSize) >= imgResult.getHeight()) {
                 sampleSize *= 2;
             }
 
@@ -411,10 +400,10 @@ public class MainActivity extends AppCompatActivity {
                 mLblResultTags.setVisibility(View.GONE);
                 addChipsViewFinal(tagsListInitial);
             } else {
-                mLblResultTags.setText("Sorry, there was an error recognizing your image.");
+                mLblResultTags.setText(R.string.err_msg_unrecognized_image);
             }
         } else {
-            mLblResultTags.setText("Sorry, there was an error recognizing your image.");
+            mLblResultTags.setText(R.string.err_msg_unrecognized_image);
         }
     }
 
@@ -427,7 +416,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addChipsViewFinal(List<String> tagList) {
-        adjustableLayout = (AdjustableLayout) findViewById(R.id.container);
+        AdjustableLayout adjustableLayout = (AdjustableLayout) findViewById(R.id.container);
         adjustableLayout.removeAllViews();
         for (int i = 0; i < tagList.size(); i++) {
             final View newView = LayoutInflater.from(this).inflate(R.layout.layout_view_chip_text, null);
@@ -441,8 +430,8 @@ public class MainActivity extends AppCompatActivity {
                     final String tempTags = txtChipTag.getText().toString();
                     if (mNetConn.isConnectedToInternet()) {
                         submitTag(tempTags);
-                    } else {
-                        Utils.showSnackBar("Can't connect right now", layoutRoot, Toast.LENGTH_LONG);
+                    }else{
+                        Utils.showSnackBar(getString(R.string.err_msg_cannot_connect), layoutRoot, Toast.LENGTH_LONG);
                         Snackbar snackbar = Snackbar.make(layoutRoot, R.string.msg_no_connection_short, Snackbar.LENGTH_LONG)
                                 .setAction(R.string.action_retry, new View.OnClickListener() {
                                     @Override
@@ -464,8 +453,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.options_menu, menu);
-        MenuItem mMenuSearch = menu.findItem(R.id.search);
-        this.item = mMenuSearch;
+        this.item = menu.findItem(R.id.search);
 
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();

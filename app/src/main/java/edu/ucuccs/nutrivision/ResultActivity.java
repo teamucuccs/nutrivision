@@ -74,7 +74,7 @@ public class ResultActivity extends AppCompatActivity {
     }
     private void loadNutriFacts() {
         pDialog = new ProgressDialog(this);
-        pDialog.setMessage("Loading...");
+        pDialog.setMessage("Fetching nutrition facts...");
         pDialog.show();
 
         RequestQueue requestQueue = Volley.newRequestQueue(this);
