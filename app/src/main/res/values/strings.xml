@@ -4,7 +4,7 @@
     <string name="fab_str_scan">Scan Barcode</string>
     <string name="fab_str_browse">Browse Food Photo</string>
     <string name="fab_str_capture">Capture Food</string>
-    <string name="fab_str_speak">Speak Food Name</string>
+    <string name="fab_str_speak">Say the Food Name</string>
     <string name="fab_str_search">Search Food</string>
 
     <string name="empty_str_recent">No recent activity. \nEnjoy your day!</string>
@@ -15,7 +15,7 @@
     <string name="speech_tap">Tap on mic to speak</string>
     <string name="speech_not_supported">Sorry! Your device doesn\'t support speech input</string>
 
-    <string name="msg_no_connection">No connection detected. Please try again.</string>
+    <string name="msg_no_connection">No connection detected.\n Please try again.</string>
     <string name="msg_no_connection_short">"Can't connect right now"</string>
 
     <string name="action_retry">Retry</string>

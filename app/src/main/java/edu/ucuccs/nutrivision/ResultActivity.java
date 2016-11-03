@@ -39,10 +39,23 @@ public class ResultActivity extends AppCompatActivity {
     private ArrayList<String> mArrayID= new ArrayList<>();
     private ArrayList<String> mArrayName = new ArrayList<>();
     private ArrayList<String> mArrayBrand = new ArrayList<>();
-    private ArrayList<String> mArrayCalories = new ArrayList<>();
-    private ArrayList<String> mArrayFat = new ArrayList<>();
     private ArrayList<String> mArrayQty = new ArrayList<>();
     private ArrayList<String> mArrayUnit = new ArrayList<>();
+    private ArrayList<String> mArrayCalories = new ArrayList<>();
+    private ArrayList<String> mArrayCaloriesFromFat = new ArrayList<>();
+    private ArrayList<String> mArrayFat = new ArrayList<>();
+    private ArrayList<String> mArraySatFat = new ArrayList<>();
+    private ArrayList<String> mArrayTransFat = new ArrayList<>();
+    private ArrayList<String> mArrayCholesterol = new ArrayList<>();
+    private ArrayList<String> mArraySodium = new ArrayList<>();
+    private ArrayList<String> mArrayCarbs = new ArrayList<>();
+    private ArrayList<String> mArrayFiber = new ArrayList<>();
+    private ArrayList<String> mArraySugars = new ArrayList<>();
+    private ArrayList<String> mArrayProtein = new ArrayList<>();
+    private ArrayList<String> mArrayVitA = new ArrayList<>();
+    private ArrayList<String> mArrayVitC = new ArrayList<>();
+    private ArrayList<String> mArrayCalcium = new ArrayList<>();
+    private ArrayList<String> mArrayIron = new ArrayList<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,49 +87,62 @@ public class ResultActivity extends AppCompatActivity {
     }
     private void loadNutriFacts() {
         pDialog = new ProgressDialog(this);
-        pDialog.setMessage("Fetching nutrition facts...");
+        pDialog.setMessage("Loading...");
         pDialog.show();
 
         RequestQueue requestQueue = Volley.newRequestQueue(this);
         JsonObjectRequest obreq = new JsonObjectRequest(Request.Method.GET,  new Credentials().returnURL(mTagTitle),null, new Response.Listener<JSONObject>() {
 
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        pDialog.hide();
-                        try {
-                            JSONArray arrHits = response.getJSONArray("hits");
-                            Log.d(TAG, "onResponse: " + arrHits.length());
-                            Log.d(TAG, "response: " + response.toString());
-                            clearArray();
-                            for (int i = 0; i < arrHits.length(); i++) {
+            @Override
+            public void onResponse(JSONObject response) {
+                pDialog.hide();
+                try {
+                    JSONArray arrHits = response.getJSONArray("hits");
+                    Log.d(TAG, "onResponse: " + arrHits.length());
+                    Log.d(TAG, "response: " + response.toString());
+                    clearArray();
+                    for (int i = 0; i < arrHits.length(); i++) {
 
-                                JSONObject objFields = arrHits.getJSONObject(i);
-                                JSONObject test = objFields.getJSONObject("fields");
-                                Log.d(TAG, "objFields: " + objFields.toString());
+                        JSONObject objFields = arrHits.getJSONObject(i);
+                        JSONObject test = objFields.getJSONObject("fields");
+                        Log.d(TAG, "objFields: " + objFields.toString());
 
-                                mArrayID.add(test.getString("item_id"));
-                                mArrayName.add(test.getString("item_name"));
-                                mArrayBrand.add(test.getString("brand_name"));
-                                mArrayCalories.add(test.getString("nf_calories"));
-                                mArrayFat.add(test.getString("nf_total_fat"));
-                                mArrayQty.add(test.getString("nf_serving_size_qty"));
-                                mArrayUnit.add(test.getString("nf_serving_size_unit"));
+                        mArrayID.add(test.getString("item_id"));
+                        mArrayName.add(test.getString("item_name"));
+                        mArrayBrand.add(test.getString("brand_name"));
+                        mArrayQty.add(test.getString("nf_serving_size_qty"));
+                        mArrayUnit.add(test.getString("nf_serving_size_unit"));
+                        mArrayCalories.add(test.getString("nf_calories"));
+                        mArrayCaloriesFromFat.add(test.getString("nf_calories_from_fat"));
+                        mArrayFat.add(test.getString("nf_total_fat"));
+                        mArraySatFat.add(test.getString("nf_saturated_fat"));
+                        mArrayTransFat.add(test.getString("nf_trans_fatty_acid"));
+                        mArrayCholesterol.add(test.getString("nf_cholesterol"));
+                        mArraySodium.add(test.getString("nf_sodium"));
+                        mArrayCarbs.add(test.getString("nf_total_carbohydrate"));
+                        mArrayFiber.add(test.getString("nf_dietary_fiber"));
+                        mArraySugars.add(test.getString("nf_sugars"));
+                        mArrayProtein.add(test.getString("nf_protein"));
+                        mArrayVitA.add(test.getString("nf_vitamin_a_dv"));
+                        mArrayVitC.add(test.getString("nf_vitamin_c_dv"));
+                        mArrayCalcium.add(test.getString("nf_calcium_dv"));
+                        mArrayIron.add(test.getString("nf_iron_dv"));
 
-                            }
-                            FoodsAdapter adapter;
-                            if (recyFoods.getAdapter() == null) {
-                                adapter = new FoodsAdapter(getApplicationContext(), feedListContent(mArrayID), recyFoods);
-                                recyFoods.setAdapter(adapter);
-                            } else {
-                                adapter = ((FoodsAdapter) recyFoods.getAdapter());
-                                adapter.resetData(feedListContent(mArrayID));
-                            }
-                        }
-                        catch (JSONException e) {
-                            e.printStackTrace();
-                        }
                     }
-                },
+                    FoodsAdapter adapter;
+                    if (recyFoods.getAdapter() == null) {
+                        adapter = new FoodsAdapter(getApplicationContext(), feedListContent(mArrayID), recyFoods);
+                        recyFoods.setAdapter(adapter);
+                    } else {
+                        adapter = ((FoodsAdapter) recyFoods.getAdapter());
+                        adapter.resetData(feedListContent(mArrayID));
+                    }
+                }
+                catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
@@ -133,21 +159,46 @@ public class ResultActivity extends AppCompatActivity {
         mArrayID.clear();
         mArrayName.clear();
         mArrayBrand.clear();
-        mArrayCalories.clear();
-        mArrayFat.clear();
         mArrayQty.clear();
         mArrayUnit.clear();
+        mArrayCalories.clear();
+        mArrayCaloriesFromFat.clear();
+        mArrayFat.clear();
+        mArraySatFat.clear();
+        mArrayTransFat.clear();
+        mArrayCholesterol.clear();
+        mArraySodium.clear();
+        mArrayCarbs.clear();
+        mArrayFiber.clear();
+        mArraySugars.clear();
+        mArrayProtein.clear();
+        mArrayVitA.clear();
+        mArrayVitC.clear();
+        mArrayCalcium.clear();
+        mArrayIron.clear();
     }
     private class FooClass implements Serializable {
         String food_id;
         String food_name;
         String food_brand;
-        String food_calories;
-        String food_fat;
-        String food_ty;
+        String food_qty;
         String food_unit;
+        String food_calories;
+        String food_caloriesfromfat;
+        String food_fat;
+        String food_satfat;
+        String food_transfat;
+        String food_cholesterol;
+        String food_sodium;
+        String food_carbs;
+        String food_fiber;
+        String food_sugars;
+        String food_protein;
+        String food_vita;
+        String food_vitc;
+        String food_calcium;
+        String food_iron;
     }
-
 
     private List<FooClass> feedListContent(ArrayList mArrayID) {
         List<FooClass> result = new ArrayList<>();
@@ -156,10 +207,23 @@ public class ResultActivity extends AppCompatActivity {
             ci.food_id = mArrayID.get(i).toString();
             ci.food_name = mArrayName.get(i);
             ci.food_brand = mArrayBrand.get(i);
-            ci.food_calories = mArrayCalories.get(i);
-            ci.food_fat = mArrayFat.get(i);
-            ci.food_ty = mArrayQty.get(i);
+            ci.food_qty = mArrayQty.get(i);
             ci.food_unit = mArrayUnit.get(i);
+            ci.food_calories = mArrayCalories.get(i);
+            ci.food_caloriesfromfat = mArrayCaloriesFromFat.get(i);
+            ci.food_fat = mArrayFat.get(i);
+            ci.food_satfat = mArraySatFat.get(i);
+            ci.food_transfat = mArrayTransFat.get(i);
+            ci.food_cholesterol = mArrayCholesterol.get(i);
+            ci.food_sodium = mArraySodium.get(i);
+            ci.food_carbs = mArrayCarbs.get(i);
+            ci.food_fiber = mArrayFiber.get(i);
+            ci.food_sugars = mArraySugars.get(i);
+            ci.food_protein = mArrayProtein.get(i);
+            ci.food_vita = mArrayVitA.get(i);
+            ci.food_vitc = mArrayVitC.get(i);
+            ci.food_calcium = mArrayCalcium.get(i);
+            ci.food_iron = mArrayIron.get(i);
             result.add(ci);
         }
         return result;
@@ -169,14 +233,14 @@ public class ResultActivity extends AppCompatActivity {
         private final List<FooClass> foodList;
         private final RecyclerView recyFoods;
 
-        public FoodsAdapter(Context applicationContext, List<FooClass> foodList, RecyclerView recyFoods) {
+        FoodsAdapter(Context applicationContext, List<FooClass> foodList, RecyclerView recyFoods) {
             this.applicationContext = applicationContext;
             this.foodList = foodList;
             this.recyFoods = recyFoods;
         }
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View rowView = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_nutri_facts, parent, false);
+            View rowView = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_nutri_facts_new, parent, false);
             return new SongListHolder(rowView);
         }
 
@@ -185,10 +249,58 @@ public class ResultActivity extends AppCompatActivity {
             final FooClass ci = foodList.get(position);
             SongListHolder holder = ((SongListHolder) hold);
             holder.lblFoodTitle.setText(ci.food_name);
-            holder.lblCalories.setText(ci.food_calories);
-            holder.lblFat.setText(ci.food_fat);
-            holder.lblQuantity.setText(ci.food_ty);
+            holder.lblQuantity.setText(ci.food_qty);
             holder.lblServings.setText(ci.food_unit);
+            holder.lblCalories.setText(ci.food_calories);
+            holder.lblCaloriesFromFat.setText(ci.food_caloriesfromfat);
+            holder.lblFat.setText(ci.food_fat);
+            holder.lblSatFat.setText(ci.food_satfat);
+            holder.lblTransFat.setText(ci.food_transfat);
+            holder.lblCholesterol.setText(ci.food_cholesterol);
+            holder.lblSodium.setText(ci.food_sodium);
+            holder.lblCarbs.setText(ci.food_carbs);
+            holder.lblFiber.setText(ci.food_fiber);
+            holder.lblSugars.setText(ci.food_sugars);
+            holder.lblProtein.setText(ci.food_protein);
+            holder.lblVitA.setText(ci.food_vita);
+            holder.lblVitC.setText(ci.food_vitc);
+            holder.lblCalcium.setText(ci.food_calcium);
+            holder.lblIron.setText(ci.food_iron);
+
+            if(holder.lblQuantity.getText().toString().equals("null"))
+                holder.lblQuantity.setText("0");
+            if(holder.lblServings.getText().toString().equals("null"))
+                holder.lblServings.setText("0");
+            if(holder.lblCalories.getText().toString().equals("null"))
+                holder.lblCalories.setText("0");
+            if(holder.lblCaloriesFromFat.getText().toString().equals("null"))
+                holder.lblCaloriesFromFat.setText("0");
+            if(holder.lblFat.getText().toString().equals("null"))
+                holder.lblFat.setText("0");
+            if(holder.lblSatFat.getText().toString().equals("null"))
+                holder.lblSatFat.setText("0");
+            if(holder.lblTransFat.getText().toString().equals("null"))
+                holder.lblTransFat.setText("0");
+            if(holder.lblCholesterol.getText().toString().equals("null"))
+                holder.lblCholesterol.setText("0");
+            if(holder.lblSodium.getText().toString().equals("null"))
+                holder.lblSodium.setText("0");
+            if(holder.lblCarbs.getText().toString().equals("null"))
+                holder.lblCarbs.setText("0");
+            if(holder.lblFiber.getText().toString().equals("null"))
+                holder.lblFiber.setText("0");
+            if(holder.lblSugars.getText().toString().equals("null"))
+                holder.lblSugars.setText("0");
+            if(holder.lblProtein.getText().toString().equals("null"))
+                holder.lblProtein.setText("0");
+            if(holder.lblVitA.getText().toString().equals("null"))
+                holder.lblVitA.setText("0");
+            if(holder.lblVitC.getText().toString().equals("null"))
+                holder.lblVitC.setText("0");
+            if(holder.lblCalcium.getText().toString().equals("null"))
+                holder.lblCalcium.setText("0");
+            if(holder.lblIron.getText().toString().equals("null"))
+                holder.lblIron.setText("0");
         }
 
         @Override
@@ -197,15 +309,30 @@ public class ResultActivity extends AppCompatActivity {
         }
 
         class SongListHolder extends RecyclerView.ViewHolder {
-            final TextView lblFoodTitle, lblCalories, lblFat, lblQuantity, lblServings;
+            final TextView lblFoodTitle, lblQuantity, lblServings, lblCalories, lblCaloriesFromFat,
+                    lblFat, lblSatFat, lblTransFat, lblCholesterol, lblSodium, lblCarbs, lblFiber,
+                    lblSugars, lblProtein, lblVitA, lblVitC, lblCalcium, lblIron;
 
             public SongListHolder(View itemView) {
                 super(itemView);
                 lblFoodTitle = (TextView) itemView.findViewById(R.id.lblFoodTitle);
+                lblQuantity = (TextView) itemView.findViewById(R.id.lblServingQty);
+                lblServings = (TextView) itemView.findViewById(R.id.lblServingUnit);
                 lblCalories = (TextView) itemView.findViewById(R.id.lblCalories);
-                lblFat = (TextView) itemView.findViewById(R.id.lblFat);
-                lblQuantity = (TextView) itemView.findViewById(R.id.lblQuantity);
-                lblServings = (TextView) itemView.findViewById(R.id.lblServings);
+                lblCaloriesFromFat = (TextView) itemView.findViewById(R.id.lblCaloriesFromFat);
+                lblFat = (TextView) itemView.findViewById(R.id.lblTotalFat);
+                lblSatFat = (TextView) itemView.findViewById(R.id.lblSatFat);
+                lblTransFat = (TextView) itemView.findViewById(R.id.lblTransFat);
+                lblCholesterol = (TextView) itemView.findViewById(R.id.lblCholesterol);
+                lblSodium = (TextView) itemView.findViewById(R.id.lblSodium);
+                lblCarbs = (TextView) itemView.findViewById(R.id.lblCarbs);
+                lblFiber = (TextView) itemView.findViewById(R.id.lblFiber);
+                lblSugars = (TextView) itemView.findViewById(R.id.lblSugar);
+                lblProtein = (TextView) itemView.findViewById(R.id.lblProtein);
+                lblVitA = (TextView) itemView.findViewById(R.id.lblVitA);
+                lblVitC = (TextView) itemView.findViewById(R.id.lblVitC);
+                lblCalcium = (TextView) itemView.findViewById(R.id.lblCalcium);
+                lblIron= (TextView) itemView.findViewById(R.id.lblIron);
             }
         }
 

@@ -327,7 +327,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void showNoConnectionState() {
-        imgEmptyState.setImageResource(R.drawable.ic_cloud_off_black_24dp);
+        imgEmptyState.setImageResource(R.drawable.empty_state_onion_connection);
         mLblEmptyState.setText(R.string.msg_no_connection);
     }
 

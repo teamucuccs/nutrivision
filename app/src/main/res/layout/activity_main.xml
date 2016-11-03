@@ -65,6 +65,13 @@
                 fab:fab_size="mini"
                 fab:fab_label="@string/fab_str_scan" />-->
             <com.github.clans.fab.FloatingActionButton
+                android:id="@+id/menu_speak"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_mic_black_24dp"
+                fab:fab_size="mini"
+                fab:fab_label="@string/fab_str_speak" />
+            <com.github.clans.fab.FloatingActionButton
                 android:id="@+id/menu_browse"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -85,13 +92,6 @@
                 android:src="@drawable/ic_search_black_24dp"
                 fab:fab_size="mini"
                 fab:fab_label="@string/fab_str_search" />
-            <com.github.clans.fab.FloatingActionButton
-                android:id="@+id/menu_speak"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_mic_black_24dp"
-                fab:fab_size="mini"
-                fab:fab_label="@string/fab_str_speak" />
         </com.github.clans.fab.FloatingActionMenu>
 
     </FrameLayout>

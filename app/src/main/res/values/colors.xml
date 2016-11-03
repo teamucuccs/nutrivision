@@ -3,4 +3,7 @@
     <color name="colorPrimary">#E6183F</color>
     <color name="colorPrimaryDark">#B71433</color>
     <color name="colorAccent">#da3151</color>
+    <color name="colorDivider">#f2f1ed</color>
+    <color name="colorDividerBlack">#000</color>
+    <color name="colorRecyclerViewBG">#ededed</color>
 </resources>
