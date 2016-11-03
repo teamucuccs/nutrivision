@@ -247,60 +247,36 @@ public class ResultActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder hold, int position) {
             final FooClass ci = foodList.get(position);
-            SongListHolder holder = ((SongListHolder) hold);
-            holder.lblFoodTitle.setText(ci.food_name);
-            holder.lblQuantity.setText(ci.food_qty);
-            holder.lblServings.setText(ci.food_unit);
-            holder.lblCalories.setText(ci.food_calories);
-            holder.lblCaloriesFromFat.setText(ci.food_caloriesfromfat);
-            holder.lblFat.setText(ci.food_fat);
-            holder.lblSatFat.setText(ci.food_satfat);
-            holder.lblTransFat.setText(ci.food_transfat);
-            holder.lblCholesterol.setText(ci.food_cholesterol);
-            holder.lblSodium.setText(ci.food_sodium);
-            holder.lblCarbs.setText(ci.food_carbs);
-            holder.lblFiber.setText(ci.food_fiber);
-            holder.lblSugars.setText(ci.food_sugars);
-            holder.lblProtein.setText(ci.food_protein);
-            holder.lblVitA.setText(ci.food_vita);
-            holder.lblVitC.setText(ci.food_vitc);
-            holder.lblCalcium.setText(ci.food_calcium);
-            holder.lblIron.setText(ci.food_iron);
+            SongListHolder hldr = ((SongListHolder) hold);
+            hldr.lblFoodTitle.setText(ci.food_name);
+            hldr.lblQuantity.setText(ci.food_qty);
+            hldr.lblServings.setText(ci.food_unit);
+            hldr.lblCalories.setText(ci.food_calories);
+            hldr.lblCaloriesFromFat.setText(ci.food_caloriesfromfat);
+            hldr.lblFat.setText(ci.food_fat);
+            hldr.lblSatFat.setText(ci.food_satfat);
+            hldr.lblTransFat.setText(ci.food_transfat);
+            hldr.lblCholesterol.setText(ci.food_cholesterol);
+            hldr.lblSodium.setText(ci.food_sodium);
+            hldr.lblCarbs.setText(ci.food_carbs);
+            hldr.lblFiber.setText(ci.food_fiber);
+            hldr.lblSugars.setText(ci.food_sugars);
+            hldr.lblProtein.setText(ci.food_protein);
+            hldr.lblVitA.setText(ci.food_vita);
+            hldr.lblVitC.setText(ci.food_vitc);
+            hldr.lblCalcium.setText(ci.food_calcium);
+            hldr.lblIron.setText(ci.food_iron);
 
-            if(holder.lblQuantity.getText().toString().equals("null"))
-                holder.lblQuantity.setText("0");
-            if(holder.lblServings.getText().toString().equals("null"))
-                holder.lblServings.setText("0");
-            if(holder.lblCalories.getText().toString().equals("null"))
-                holder.lblCalories.setText("0");
-            if(holder.lblCaloriesFromFat.getText().toString().equals("null"))
-                holder.lblCaloriesFromFat.setText("0");
-            if(holder.lblFat.getText().toString().equals("null"))
-                holder.lblFat.setText("0");
-            if(holder.lblSatFat.getText().toString().equals("null"))
-                holder.lblSatFat.setText("0");
-            if(holder.lblTransFat.getText().toString().equals("null"))
-                holder.lblTransFat.setText("0");
-            if(holder.lblCholesterol.getText().toString().equals("null"))
-                holder.lblCholesterol.setText("0");
-            if(holder.lblSodium.getText().toString().equals("null"))
-                holder.lblSodium.setText("0");
-            if(holder.lblCarbs.getText().toString().equals("null"))
-                holder.lblCarbs.setText("0");
-            if(holder.lblFiber.getText().toString().equals("null"))
-                holder.lblFiber.setText("0");
-            if(holder.lblSugars.getText().toString().equals("null"))
-                holder.lblSugars.setText("0");
-            if(holder.lblProtein.getText().toString().equals("null"))
-                holder.lblProtein.setText("0");
-            if(holder.lblVitA.getText().toString().equals("null"))
-                holder.lblVitA.setText("0");
-            if(holder.lblVitC.getText().toString().equals("null"))
-                holder.lblVitC.setText("0");
-            if(holder.lblCalcium.getText().toString().equals("null"))
-                holder.lblCalcium.setText("0");
-            if(holder.lblIron.getText().toString().equals("null"))
-                holder.lblIron.setText("0");
+            setToZeroIfNull(hldr.lblQuantity, hldr.lblServings, hldr.lblCalories, hldr.lblCaloriesFromFat, hldr.lblFat,
+                    hldr.lblSatFat, hldr.lblTransFat, hldr.lblCholesterol, hldr.lblSodium, hldr.lblCarbs, hldr.lblFiber,
+                    hldr.lblSugars, hldr.lblProtein, hldr.lblVitA, hldr.lblVitC,  hldr.lblCalcium, hldr.lblIron );
+        }
+
+        void setToZeroIfNull(TextView... mTxtViews){
+            for (TextView txt: mTxtViews) {
+                if (txt.getText().toString().equals("null"))
+                    txt.setText("0");
+            }
         }
 
         @Override
