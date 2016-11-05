@@ -46,7 +46,9 @@ import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -120,6 +122,8 @@ public class MainActivity extends AppCompatActivity {
 
         grantPermissions();
 
+        getSend();
+
         mFabCam.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -190,6 +194,42 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         return true;
+    }
+
+    public void getSend(){
+        // Get intent, action and MIME type
+        Intent intent = getIntent();
+        String action = intent.getAction();
+        String type = intent.getType();
+
+        if (Intent.ACTION_SEND.equals(action) && type != null) {
+
+            if (type.startsWith("image/")) {
+                handleSendImage(intent); // Handle single image being sent
+            }
+        }
+    }
+
+    void handleSendImage(Intent intent) {
+        Uri imageUriSend = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
+        if (imageUriSend != null) {
+            // Update UI to reflect image being shared
+
+            try {
+                mLinearEmpty.setVisibility(View.GONE);
+                InputStream inputStream = null;
+                inputStream = getContentResolver().openInputStream(imageUriSend);
+                thumbnail = BitmapFactory.decodeStream(inputStream);
+                imgResult.setImageBitmap(thumbnail);
+                callClarifai(thumbnail);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+
+        }
+        else {
+            mLblResultTags.setText("Unable to load selected image.");
+        }
     }
 
     @Override
