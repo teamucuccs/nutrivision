@@ -11,7 +11,7 @@
     <string name="title_activity_results">Result</string>
     <string name="title_nutrition_facts">"Nutrition Facts"</string>
 
-    <string name="speech_prompt">Say something&#8230;</string>
+    <string name="speech_prompt">Say the food name&#8230;</string>
     <string name="speech_tap">Tap on mic to speak</string>
     <string name="speech_not_supported">Sorry! Your device doesn\'t support speech input</string>
 
@@ -28,4 +28,5 @@
     <string name="info_msg_loading">Loading…</string>
     <string name="confirm_msg_correct">"Is this correct?"</string>
     <string name="info_allow_permission_capture">"You need to allow permission in order to capture images."</string>
+    <string name="no_nutrifacts">"Sorry, we can't retrieve nutrition facts about this food."</string>
 </resources>

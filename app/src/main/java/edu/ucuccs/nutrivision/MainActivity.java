@@ -223,6 +223,7 @@ public class MainActivity extends AppCompatActivity {
                 imgResult.setImageBitmap(thumbnail);
                 callClarifai(thumbnail);
             } catch (FileNotFoundException e) {
+                mLblResultTags.setText("Unable to load selected image.");
                 e.printStackTrace();
             }
 

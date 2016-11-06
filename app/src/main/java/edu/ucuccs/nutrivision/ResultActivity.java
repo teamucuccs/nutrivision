@@ -32,6 +32,7 @@ public class ResultActivity extends AppCompatActivity {
     private Toolbar mToolbar;
     private String mTagTitle;
     private ImageView imgResult;
+    private TextView nutriText;
     private static final String TAG = ResultActivity.class.getSimpleName();
     private ProgressDialog pDialog;
     private RecyclerView recyFoods;
@@ -63,6 +64,7 @@ public class ResultActivity extends AppCompatActivity {
         mToolbar        = (Toolbar) findViewById(R.id.result_toolbar);
         imgResult       = (ImageView) findViewById(R.id.img_result);
         recyFoods       = (RecyclerView) findViewById(R.id.recyFoods);
+        nutriText       = (TextView) findViewById(R.id.no_nutrifacts_text);
 
         recyFoods.setHasFixedSize(true);
 
@@ -140,6 +142,7 @@ public class ResultActivity extends AppCompatActivity {
                 }
                 catch (JSONException e) {
                     e.printStackTrace();
+                    nutriText.setVisibility(View.VISIBLE);
                 }
             }
         },
@@ -147,6 +150,7 @@ public class ResultActivity extends AppCompatActivity {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         pDialog.hide();
+                        nutriText.setVisibility(View.VISIBLE);
                         Log.e("Volley", "Error");
                     }
                 }
