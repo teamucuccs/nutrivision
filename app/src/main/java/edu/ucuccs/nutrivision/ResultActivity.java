@@ -293,7 +293,7 @@ public class ResultActivity extends AppCompatActivity {
                     lblFat, lblSatFat, lblTransFat, lblCholesterol, lblSodium, lblCarbs, lblFiber,
                     lblSugars, lblProtein, lblVitA, lblVitC, lblCalcium, lblIron;
 
-            public SongListHolder(View itemView) {
+            SongListHolder(View itemView) {
                 super(itemView);
                 lblFoodTitle = (TextView) itemView.findViewById(R.id.lblFoodTitle);
                 lblQuantity = (TextView) itemView.findViewById(R.id.lblServingQty);
@@ -316,7 +316,7 @@ public class ResultActivity extends AppCompatActivity {
             }
         }
 
-        public void resetData(List<FooClass> listSong) {
+        void resetData(List<FooClass> listSong) {
             this.foodList.clear();
             this.foodList.addAll(listSong);
             notifyDataSetChanged();
