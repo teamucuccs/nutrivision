@@ -8,10 +8,14 @@
 package edu.ucuccs.nutrivision;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
+import android.util.Base64;
 import android.view.View;
 import android.widget.Toast;
+
+import java.io.ByteArrayOutputStream;
 
 public class Utils {
 
@@ -37,4 +41,13 @@ public class Utils {
     public static void showSnackBar(int msg, CoordinatorLayout layout, int length){
         Snackbar.make(layout, msg, length).show();
     }
+    static String convertBitmapToBase64(Bitmap bitmap) {
+        String mAttachedImage;
+        ByteArrayOutputStream bao = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, bao);
+        byte[] ba = bao.toByteArray();
+        mAttachedImage = Base64.encodeToString(ba, Base64.DEFAULT);
+        return mAttachedImage;
+    }
+
 }

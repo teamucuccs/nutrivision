@@ -1,6 +1,8 @@
 package edu.ucuccs.nutrivision;
 
 import android.Manifest;
+import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
@@ -8,15 +10,19 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.speech.RecognizerIntent;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -30,28 +36,36 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.clarifai.api.ClarifaiClient;
 import com.clarifai.api.RecognitionRequest;
 import com.clarifai.api.RecognitionResult;
 import com.clarifai.api.Tag;
 import com.clarifai.api.exception.ClarifaiException;
+import com.flipboard.bottomsheet.BottomSheetLayout;
+import com.flipboard.bottomsheet.commons.ImagePickerSheetView;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetView;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
 
 import edu.ucuccs.nutrivision.custom.AdjustableLayout;
 
@@ -67,8 +81,11 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_SHOT   = 3;
     private static final int CODE_SPEAK     = 4;
 
-    private Intent data;
+    private static final int REQUEST_STORAGE = 0;
+    private static final int REQUEST_IMAGE_CAPTURE = REQUEST_STORAGE + 1;
+    private static final int REQUEST_LOAD_IMAGE = REQUEST_IMAGE_CAPTURE + 1;
 
+    private BottomSheetLayout bottomSheetGallery;
     private MenuItem item;
 
     private AlertDialog.Builder confirmTextDialog;
@@ -79,6 +96,7 @@ public class MainActivity extends AppCompatActivity {
     private CoordinatorLayout layoutRoot;
     private TextView mLblResultTags;
     private TextView mLblEmptyState;
+    private Uri cameraImageUri = null;
 
     private ImageView imgResult;
     private ImageView imgEmptyState;
@@ -104,16 +122,19 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mToolbar        = (Toolbar) findViewById(R.id.toolbar);
         FloatingActionButton mFabCam = (FloatingActionButton) findViewById(R.id.menu_camera);
         FloatingActionButton mFabBrowse = (FloatingActionButton) findViewById(R.id.menu_browse);
         FloatingActionButton mFabSpeak = (FloatingActionButton) findViewById(R.id.menu_speak);
         FloatingActionButton mFabSearch = (FloatingActionButton) findViewById(R.id.menu_search);
-        fabMenu         = (FloatingActionMenu) findViewById(R.id.fab_menu);
-        imgResult       = (ImageView) findViewById(R.id.img_result);
-        mLblResultTags  = (TextView) findViewById(R.id.lbl_result_tag);
-        mLblEmptyState  = (TextView) findViewById(R.id.lbl_empty_state);
-        imgEmptyState   = (ImageView) findViewById(R.id.img_empty_state);
+
+        mToolbar            = (Toolbar) findViewById(R.id.toolbar);
+        bottomSheetGallery  = (BottomSheetLayout) findViewById(R.id.btmsheet_gallery);
+        layoutRoot          = (CoordinatorLayout) findViewById(R.id.layoutRoot);
+        fabMenu             = (FloatingActionMenu) findViewById(R.id.fab_menu);
+        imgResult           = (ImageView) findViewById(R.id.img_result);
+        mLblResultTags      = (TextView) findViewById(R.id.lbl_result_tag);
+        mLblEmptyState      = (TextView) findViewById(R.id.lbl_empty_state);
+        imgEmptyState       = (ImageView) findViewById(R.id.img_empty_state);
 
         mLinearEmpty = (LinearLayout) findViewById(R.id.layout_empty_state);
         confirmTextDialog = new AlertDialog.Builder(this);
@@ -135,7 +156,11 @@ public class MainActivity extends AppCompatActivity {
         mFabBrowse.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                browseGallery();
+                if (checkNeedsPermission()) {
+                    requestStoragePermission();
+                } else {
+                    showSheetView();
+                }
                 fabMenu.close(true);
             }
         });
@@ -257,22 +282,31 @@ public class MainActivity extends AppCompatActivity {
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, REQUEST_SHOT);
     }
 
+
+
+
+    @TargetApi(Build.VERSION_CODES.M)
     @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
             case REQUEST_SHOT: {
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    cameraShot();
-                } else {
-                    Utils.showToast(getString(R.string.info_allow_permission_capture), Toast.LENGTH_LONG);
+                    if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                        cameraShot();
+                    } else {
+                        Utils.showToast(getString(R.string.info_allow_permission_capture), Toast.LENGTH_LONG);
+                    }
                 }
-            }
+                break;
+            case REQUEST_STORAGE:
+                    if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                        hideSoftKeyboard();
+                        showSheetView();
+                    } else {
+                        Toast.makeText(this, "Allow permission to access external storage", Toast.LENGTH_SHORT).show();
+                    }
+                break;
         }
-    }
-
-    public void browseGallery() {
-        final Intent intent = new Intent(Intent.ACTION_PICK, Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(intent, CODE_PICK);
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     public void speechText(){
@@ -307,7 +341,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        this.data = data;
 
         if (mNetConn.isConnectedToInternet()) {
             if (requestCode == CODE_PICK && resultCode == RESULT_OK) {
@@ -364,6 +397,31 @@ public class MainActivity extends AppCompatActivity {
             mLinearEmpty.setVisibility(View.VISIBLE);
         } else {
             showNoConnectionState();
+        }
+
+        if (resultCode == Activity.RESULT_OK) {
+            Uri selectedImage = null;
+            if (requestCode == REQUEST_LOAD_IMAGE && data != null) {
+                selectedImage = data.getData();
+                if (selectedImage == null) {
+                    genericError();
+                }
+            } else if (requestCode == REQUEST_IMAGE_CAPTURE) {
+                // Do something with imagePath
+                selectedImage = cameraImageUri;
+            }
+
+            if (selectedImage != null) {
+                try {
+                    sendSelectedImage(selectedImage);
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                genericError();
+            }
         }
     }
 
@@ -500,5 +558,141 @@ public class MainActivity extends AppCompatActivity {
         SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         return true;
+    }
+
+    /*
+    *
+    * Display bottomsheet
+     */
+    private boolean checkNeedsPermission() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED;
+    }
+
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    private void requestStoragePermission() {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_STORAGE);
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_STORAGE);
+        }
+    }
+
+    /**
+     * Show an {@link ImagePickerSheetView}
+     */
+    private void showSheetView() {
+        ImagePickerSheetView sheetView = new ImagePickerSheetView.Builder(this)
+                .setMaxItems(30)
+                .setShowCameraOption(createCameraIntent() != null)
+                .setShowPickerOption(createPickIntent() != null)
+                .setImageProvider(new ImagePickerSheetView.ImageProvider() {
+                    @Override
+                    public void onProvideImage(ImageView imageView, Uri imageUri, int size) {
+                        Glide.with(MainActivity.this)
+                                .load(imageUri)
+                                .crossFade()
+                                .into(imageView);
+                    }
+                })
+                .setOnTileSelectedListener(new ImagePickerSheetView.OnTileSelectedListener() {
+                    @Override
+                    public void onTileSelected(ImagePickerSheetView.ImagePickerTile selectedTile) {
+                        bottomSheetGallery.dismissSheet();
+                        if (selectedTile.isCameraTile()) {
+                            dispatchTakePictureIntent();
+                        } else if (selectedTile.isPickerTile()) {
+                            startActivityForResult(createPickIntent(), REQUEST_LOAD_IMAGE);
+                        } else if (selectedTile.isImageTile()) {
+                            try {
+                                sendSelectedImage(selectedTile.getImageUri());
+                            } catch (ExecutionException | InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        } else {
+                            genericError();
+                        }
+                    }
+                })
+                .setTitle("Select an image...")
+                .create();
+
+        bottomSheetGallery.showWithSheetView(sheetView);
+    }
+
+    private File createImageFile() throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        File imageFile = File.createTempFile(
+                imageFileName,
+                ".jpg",
+                storageDir
+        );
+
+        cameraImageUri = Uri.fromFile(imageFile);
+        return imageFile;
+    }
+
+    @Nullable
+    private Intent createPickIntent() {
+        Intent picImageIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        if (picImageIntent.resolveActivity(getPackageManager()) != null) {
+            return picImageIntent;
+        } else {
+            return null;
+        }
+    }
+
+    @Nullable
+    private Intent createCameraIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            return takePictureIntent;
+        } else {
+            return null;
+        }
+    }
+
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = createCameraIntent();
+        if (takePictureIntent != null) {
+            try {
+                File imageFile = createImageFile();
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(imageFile));
+                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+            } catch (IOException e) {
+                genericError("Could not create imageFile for camera");
+            }
+        }
+    }
+    private void sendSelectedImage(Uri selectedImageUri) throws ExecutionException, InterruptedException {
+        Log.d("uri",selectedImageUri + "");
+        imgResult.setImageDrawable(null);
+        Bitmap bitmap = null;
+        String photo = null;
+        try {
+            bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImageUri);
+            photo = Utils.convertBitmapToBase64(bitmap);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Drawable d = new BitmapDrawable(getResources(), bitmap);
+        imgResult.setImageDrawable(d);
+        callClarifai(bitmap);
+        mLinearEmpty.setVisibility(View.GONE);
+    }
+
+    private void genericError() {
+        genericError(null);
+    }
+    private void genericError(String message) {
+        Toast.makeText(this, message == null ? "Something went wrong." : message, Toast.LENGTH_SHORT).show();
+    }
+
+    private void hideSoftKeyboard() {
+        if (getCurrentFocus() != null) {
+            InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+            inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+        }
     }
 }
