@@ -2,7 +2,11 @@ package edu.ucuccs.nutrivision;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -28,7 +32,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ResultActivity extends AppCompatActivity {
+public class ResultActivity extends AppCompatActivity implements AppBarLayout.OnOffsetChangedListener {
     private Toolbar mToolbar;
     private String mTagTitle;
     private ImageView imgResult;
@@ -57,6 +61,13 @@ public class ResultActivity extends AppCompatActivity {
     private ArrayList<String> mArrayVitC = new ArrayList<>();
     private ArrayList<String> mArrayCalcium = new ArrayList<>();
     private ArrayList<String> mArrayIron = new ArrayList<>();
+
+    private static final int PERCENTAGE_TO_SHOW_IMAGE = 20;
+    private View mFab;
+    private int mMaxScrollSize;
+    private boolean mIsImageHidden;
+    private CollapsingToolbarLayout collapseToolbar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,6 +76,7 @@ public class ResultActivity extends AppCompatActivity {
         imgResult       = (ImageView) findViewById(R.id.img_result);
         recyFoods       = (RecyclerView) findViewById(R.id.recyFoods);
         nutriText       = (TextView) findViewById(R.id.no_nutrifacts_text);
+        collapseToolbar = (CollapsingToolbarLayout) findViewById(R.id.flexible_example_collapsing);
 
         recyFoods.setHasFixedSize(true);
 
@@ -79,13 +91,16 @@ public class ResultActivity extends AppCompatActivity {
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_right);
             }
         });
+
+        AppBarLayout appbar = (AppBarLayout) findViewById(R.id.flexible_example_appbar);
+        appbar.addOnOffsetChangedListener(this);
         loadNutriFacts();
     }
     void setUpToolbar(){
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle(mTagTitle.substring(0,1).toUpperCase() + mTagTitle.substring(1).toLowerCase());
+        collapseToolbar.setTitle(mTagTitle.substring(0,1).toUpperCase() + mTagTitle.substring(1).toLowerCase());
     }
     private void loadNutriFacts() {
         pDialog = new ProgressDialog(this);
@@ -295,24 +310,24 @@ public class ResultActivity extends AppCompatActivity {
 
             SongListHolder(View itemView) {
                 super(itemView);
-                lblFoodTitle = (TextView) itemView.findViewById(R.id.lblFoodTitle);
-                lblQuantity = (TextView) itemView.findViewById(R.id.lblServingQty);
-                lblServings = (TextView) itemView.findViewById(R.id.lblServingUnit);
-                lblCalories = (TextView) itemView.findViewById(R.id.lblCalories);
-                lblCaloriesFromFat = (TextView) itemView.findViewById(R.id.lblCaloriesFromFat);
-                lblFat = (TextView) itemView.findViewById(R.id.lblTotalFat);
-                lblSatFat = (TextView) itemView.findViewById(R.id.lblSatFat);
-                lblTransFat = (TextView) itemView.findViewById(R.id.lblTransFat);
-                lblCholesterol = (TextView) itemView.findViewById(R.id.lblCholesterol);
-                lblSodium = (TextView) itemView.findViewById(R.id.lblSodium);
-                lblCarbs = (TextView) itemView.findViewById(R.id.lblCarbs);
-                lblFiber = (TextView) itemView.findViewById(R.id.lblFiber);
-                lblSugars = (TextView) itemView.findViewById(R.id.lblSugar);
-                lblProtein = (TextView) itemView.findViewById(R.id.lblProtein);
-                lblVitA = (TextView) itemView.findViewById(R.id.lblVitA);
-                lblVitC = (TextView) itemView.findViewById(R.id.lblVitC);
-                lblCalcium = (TextView) itemView.findViewById(R.id.lblCalcium);
-                lblIron= (TextView) itemView.findViewById(R.id.lblIron);
+                lblFoodTitle        = (TextView) itemView.findViewById(R.id.lblFoodTitle);
+                lblQuantity         = (TextView) itemView.findViewById(R.id.lblServingQty);
+                lblServings         = (TextView) itemView.findViewById(R.id.lblServingUnit);
+                lblCalories         = (TextView) itemView.findViewById(R.id.lblCalories);
+                lblCaloriesFromFat  = (TextView) itemView.findViewById(R.id.lblCaloriesFromFat);
+                lblFat              = (TextView) itemView.findViewById(R.id.lblTotalFat);
+                lblSatFat           = (TextView) itemView.findViewById(R.id.lblSatFat);
+                lblTransFat         = (TextView) itemView.findViewById(R.id.lblTransFat);
+                lblCholesterol      = (TextView) itemView.findViewById(R.id.lblCholesterol);
+                lblSodium           = (TextView) itemView.findViewById(R.id.lblSodium);
+                lblCarbs            = (TextView) itemView.findViewById(R.id.lblCarbs);
+                lblFiber            = (TextView) itemView.findViewById(R.id.lblFiber);
+                lblSugars           = (TextView) itemView.findViewById(R.id.lblSugar);
+                lblProtein          = (TextView) itemView.findViewById(R.id.lblProtein);
+                lblVitA             = (TextView) itemView.findViewById(R.id.lblVitA);
+                lblVitC             = (TextView) itemView.findViewById(R.id.lblVitC);
+                lblCalcium          = (TextView) itemView.findViewById(R.id.lblCalcium);
+                lblIron             = (TextView) itemView.findViewById(R.id.lblIron);
             }
         }
 
@@ -320,6 +335,29 @@ public class ResultActivity extends AppCompatActivity {
             this.foodList.clear();
             this.foodList.addAll(listSong);
             notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public void onOffsetChanged(AppBarLayout appBarLayout, int i) {
+        if (mMaxScrollSize == 0)
+            mMaxScrollSize = appBarLayout.getTotalScrollRange();
+
+        int currentScrollPercentage = (Math.abs(i)) * 100 / mMaxScrollSize;
+
+        if (currentScrollPercentage >= PERCENTAGE_TO_SHOW_IMAGE) {
+            if (!mIsImageHidden) {
+                mIsImageHidden = true;
+
+                ViewCompat.animate(mFab).scaleY(0).scaleX(0).start();
+            }
+        }
+
+        if (currentScrollPercentage < PERCENTAGE_TO_SHOW_IMAGE) {
+            if (mIsImageHidden) {
+                mIsImageHidden = false;
+                ViewCompat.animate(mFab).scaleY(1).scaleX(1).start();
+            }
         }
     }
 }
