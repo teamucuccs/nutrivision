@@ -17,8 +17,8 @@ class Credentials {
 
     }
     public interface NUTRIONIX {
-        String APP_ID = "f8d8df72";
-        String API_KEY = "d9aea37b804ffef0a9cdc1378638706c";
+        String APP_ID = "cc41cf9d";
+        String API_KEY = "070502cd54fa6bfb1790e382e10c7731";
     }
 
     public String returnURL(String keyword){
