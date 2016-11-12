@@ -136,6 +136,9 @@ public class MainActivity extends AppCompatActivity {
 
         mLinearEmpty = (LinearLayout) findViewById(R.id.layout_empty_state);
         confirmTextDialog = new AlertDialog.Builder(this);
+
+        fabMenu.setClosedOnTouchOutside(true);
+
         setUpToolbar();
         handleIntent(getIntent());
 
