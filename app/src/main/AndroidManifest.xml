@@ -50,7 +50,6 @@
             android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -65,7 +64,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".RestaurantActivity"
-            android:label="@string/title_resto_menu"></activity>
+            android:label="@string/title_resto_menu"/>
+        <activity android:name=".WelcomeActivity"/>
     </application>
 
 </manifest>
