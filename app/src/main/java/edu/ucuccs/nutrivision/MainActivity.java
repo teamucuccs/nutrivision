@@ -50,8 +50,6 @@ import com.clarifai.api.Tag;
 import com.clarifai.api.exception.ClarifaiException;
 import com.flipboard.bottomsheet.BottomSheetLayout;
 import com.flipboard.bottomsheet.commons.ImagePickerSheetView;
-import com.getkeepsafe.taptargetview.TapTarget;
-import com.getkeepsafe.taptargetview.TapTargetView;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 
@@ -183,21 +181,6 @@ public class MainActivity extends AppCompatActivity {
         //featureDiscovery();
     }
 
-    void featureDiscovery() {
-        TapTargetView.showFor(this, TapTarget.forView(findViewById(R.id.fabTemp), "This is the Action Button", "Browse, search, take pictures and instantly receive results")
-                        .textColor(android.R.color.white)
-                        .dimColor(android.R.color.black)
-                        .drawShadow(true)
-                        .cancelable(true)
-                        .tintTarget(false),
-                new TapTargetView.Listener() {
-                    @Override
-                    public void onTargetClick(TapTargetView view) {
-                        super.onTargetClick(view);
-
-                    }
-                });
-    }
 
     void setUpToolbar() {
         setSupportActionBar(mToolbar);
