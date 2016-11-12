@@ -50,8 +50,6 @@ import com.clarifai.api.Tag;
 import com.clarifai.api.exception.ClarifaiException;
 import com.flipboard.bottomsheet.BottomSheetLayout;
 import com.flipboard.bottomsheet.commons.ImagePickerSheetView;
-import com.getkeepsafe.taptargetview.TapTarget;
-import com.getkeepsafe.taptargetview.TapTargetView;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 
@@ -68,7 +66,6 @@ import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
 import edu.ucuccs.nutrivision.custom.AdjustableLayout;
-
 import static android.provider.MediaStore.Images.Media;
 
 public class MainActivity extends AppCompatActivity {
@@ -122,10 +119,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        FloatingActionButton mFabCam = (FloatingActionButton) findViewById(R.id.menu_camera);
-        FloatingActionButton mFabBrowse = (FloatingActionButton) findViewById(R.id.menu_browse);
-        FloatingActionButton mFabSpeak = (FloatingActionButton) findViewById(R.id.menu_speak);
-        FloatingActionButton mFabSearch = (FloatingActionButton) findViewById(R.id.menu_search);
+        FloatingActionButton mFabResto      = (FloatingActionButton) findViewById(R.id.menu_resto);
+        FloatingActionButton mFabCam        = (FloatingActionButton) findViewById(R.id.menu_camera);
+        FloatingActionButton mFabBrowse     = (FloatingActionButton) findViewById(R.id.menu_browse);
+        FloatingActionButton mFabSpeak      = (FloatingActionButton) findViewById(R.id.menu_speak);
+        FloatingActionButton mFabSearch     = (FloatingActionButton) findViewById(R.id.menu_search);
 
         mToolbar            = (Toolbar) findViewById(R.id.toolbar);
         bottomSheetGallery  = (BottomSheetLayout) findViewById(R.id.btmsheet_gallery);
@@ -145,6 +143,13 @@ public class MainActivity extends AppCompatActivity {
 
         getSend();
 
+        mFabResto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(getApplicationContext(), RestaurantActivity.class));
+                fabMenu.close(true);
+            }
+        });
         mFabCam.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -180,23 +185,6 @@ public class MainActivity extends AppCompatActivity {
                 fabMenu.close(true);
             }
         });
-        //featureDiscovery();
-    }
-
-    void featureDiscovery() {
-        TapTargetView.showFor(this, TapTarget.forView(findViewById(R.id.fabTemp), "This is the Action Button", "Browse, search, take pictures and instantly receive results")
-                        .textColor(android.R.color.white)
-                        .dimColor(android.R.color.black)
-                        .drawShadow(true)
-                        .cancelable(true)
-                        .tintTarget(false),
-                new TapTargetView.Listener() {
-                    @Override
-                    public void onTargetClick(TapTargetView view) {
-                        super.onTargetClick(view);
-
-                    }
-                });
     }
 
     void setUpToolbar() {
@@ -313,8 +301,7 @@ public class MainActivity extends AppCompatActivity {
         Intent mIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         mIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         mIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
-        mIntent.putExtra(RecognizerIntent.EXTRA_PROMPT,
-                getString(R.string.speech_prompt));
+        mIntent.putExtra(RecognizerIntent.EXTRA_PROMPT, getString(R.string.speech_prompt));
 
         try {
             startActivityForResult(mIntent, CODE_SPEAK);
@@ -407,16 +394,13 @@ public class MainActivity extends AppCompatActivity {
                     genericError();
                 }
             } else if (requestCode == REQUEST_IMAGE_CAPTURE) {
-                // Do something with imagePath
                 selectedImage = cameraImageUri;
             }
 
             if (selectedImage != null) {
                 try {
                     sendSelectedImage(selectedImage);
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
+                } catch (ExecutionException | InterruptedException e) {
                     e.printStackTrace();
                 }
             } else {

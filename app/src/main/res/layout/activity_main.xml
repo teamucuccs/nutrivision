@@ -74,6 +74,13 @@
                 fab:fab_size="mini"
                 fab:fab_label="@string/fab_str_scan" />-->
             <com.github.clans.fab.FloatingActionButton
+                android:id="@+id/menu_resto"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_restaurant_menu_black_24dp"
+                fab:fab_size="mini"
+                fab:fab_label="@string/fab_str_resto" />
+            <com.github.clans.fab.FloatingActionButton
                 android:id="@+id/menu_speak"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
