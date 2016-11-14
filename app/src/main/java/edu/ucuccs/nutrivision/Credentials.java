@@ -14,11 +14,15 @@ class Credentials {
 
         String CLIENT_ID = "HyvKQpTZGPqeqOBT-iiumKO0wBToi2dUXsLY-_-y";
         String CLIENT_SECRET = "KWWtZYOKP_uW3aq7SGZ7Tfjj2WjlXqPzKg8b1OJI";
-
     }
+
     public interface NUTRIONIX {
         String APP_ID = "cc41cf9d";
         String API_KEY = "070502cd54fa6bfb1790e382e10c7731";
+    }
+
+    public interface NUTRIVISION{
+        String RESTAURANTS_URL = "http://ucu.edu.ph/nutrivision-api/v1/restaurants";
     }
 
     public String returnURL(String keyword){
