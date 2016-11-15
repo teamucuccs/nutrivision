@@ -2,6 +2,7 @@ package edu.ucuccs.nutrivision;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
@@ -29,6 +30,8 @@ import org.json.JSONObject;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
+import edu.ucuccs.nutrivision.custom.CircleImageTransform;
 
 public class RestaurantActivity extends AppCompatActivity {
     private Toolbar mToolbar;
@@ -65,6 +68,7 @@ public class RestaurantActivity extends AppCompatActivity {
     private void loadRestaurants() {
         pDialog = new ProgressDialog(this);
         pDialog.setMessage("Loading Restaurants...");
+        pDialog.setCancelable(false);
         pDialog.show();
 
         RequestQueue requestQueue = Volley.newRequestQueue(this);
@@ -96,7 +100,6 @@ public class RestaurantActivity extends AppCompatActivity {
                 }
                 catch (JSONException e) {
                     e.printStackTrace();
-                    //nutriText.setVisibility(View.VISIBLE);
                 }
             }
         },
@@ -156,7 +159,21 @@ public class RestaurantActivity extends AppCompatActivity {
             hldr.lblRestoName.setText(ci.resto_name);
             Glide.with(mContext)
                     .load(ci.resto_logo)
+                    .transform(new CircleImageTransform(mContext))
                     .into(hldr.imgRestoLogo);
+            hldr.imgRestoLogo.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent i = new Intent(mContext, RestaurantMenuListActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putString("resto_name", ci.resto_name);
+                    bundle.putString("resto_logo", ci.resto_logo);
+                    i.putExtras(bundle);
+                    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(i);
+                    overridePendingTransition(R.anim.slide_up, R.anim.zoom_out);
+                }
+            });
         }
 
         @Override
