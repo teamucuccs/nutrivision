@@ -1,7 +1,7 @@
 /**
- * Author: Aljohn De Guzman on 10/10/2016.
- * WebOutsourcing Gateway Inc.
- * adeguzman@weboutsourcing-gateway.com
+ * Author: UCU Knight Coders on 11/15/2016.
+ * Website: http://facebook.com/teamucuccs
+ * E-mail: teamucuccs@gmail.com
  */
 
 package edu.ucuccs.nutrivision.custom;
