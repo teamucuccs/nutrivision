@@ -25,10 +25,10 @@
                 android:id="@+id/img_result"
                 android:layout_width="fill_parent"
                 android:layout_height="match_parent"
+                android:contentDescription=""
                 android:scaleType="centerCrop"
                 android:src="@mipmap/default_food_cover"
-                android:tint="#bbb43e50"
-                tools:ignore="ContentDescription" />
+                android:tint="#bbb43e50" />
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/result_toolbar"
@@ -91,8 +91,7 @@
                         android:paddingRight="30dp"
                         android:text="@string/no_nutrifacts"
                         android:fontFamily="sans-serif"
-                        android:visibility="gone"
-                        tools:targetApi="jelly_bean" />
+                        android:visibility="gone"/>
 
                     <android.support.v7.widget.RecyclerView
                         android:id="@+id/recyFoods"

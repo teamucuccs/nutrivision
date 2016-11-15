@@ -2,7 +2,6 @@ package edu.ucuccs.nutrivision;
 
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
@@ -196,7 +195,7 @@ public class ResultActivity extends AppCompatActivity implements AppBarLayout.On
         mArrayCalcium.clear();
         mArrayIron.clear();
     }
-    private class FooClass implements Serializable {
+    private class FoodClass implements Serializable {
         String food_id;
         String food_name;
         String food_brand;
@@ -219,10 +218,10 @@ public class ResultActivity extends AppCompatActivity implements AppBarLayout.On
         String food_iron;
     }
 
-    private List<FooClass> feedListContent(ArrayList mArrayID) {
-        List<FooClass> result = new ArrayList<>();
+    private List<FoodClass> feedListContent(ArrayList mArrayID) {
+        List<FoodClass> result = new ArrayList<>();
         for (int i = 0; i < mArrayID.size(); i++) {
-            FooClass ci = new FooClass();
+            FoodClass ci = new FoodClass();
             ci.food_id = mArrayID.get(i).toString();
             ci.food_name = mArrayName.get(i);
             ci.food_brand = mArrayBrand.get(i);
@@ -249,10 +248,10 @@ public class ResultActivity extends AppCompatActivity implements AppBarLayout.On
     }
     private class FoodsAdapter extends RecyclerView.Adapter {
         private final Context applicationContext;
-        private final List<FooClass> foodList;
+        private final List<FoodClass> foodList;
         private final RecyclerView recyFoods;
 
-        FoodsAdapter(Context applicationContext, List<FooClass> foodList, RecyclerView recyFoods) {
+        FoodsAdapter(Context applicationContext, List<FoodClass> foodList, RecyclerView recyFoods) {
             this.applicationContext = applicationContext;
             this.foodList = foodList;
             this.recyFoods = recyFoods;
@@ -260,13 +259,13 @@ public class ResultActivity extends AppCompatActivity implements AppBarLayout.On
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View rowView = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_nutri_facts_new, parent, false);
-            return new SongListHolder(rowView);
+            return new FoodListHolder(rowView);
         }
 
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder hold, int position) {
-            final FooClass ci = foodList.get(position);
-            SongListHolder hldr = ((SongListHolder) hold);
+            final FoodClass ci = foodList.get(position);
+            FoodListHolder hldr = ((FoodListHolder) hold);
             hldr.lblFoodTitle.setText(ci.food_name);
             hldr.lblQuantity.setText(ci.food_qty);
             hldr.lblServings.setText(ci.food_unit);
@@ -303,12 +302,12 @@ public class ResultActivity extends AppCompatActivity implements AppBarLayout.On
             return foodList.size();
         }
 
-        class SongListHolder extends RecyclerView.ViewHolder {
+        class FoodListHolder extends RecyclerView.ViewHolder {
             final TextView lblFoodTitle, lblQuantity, lblServings, lblCalories, lblCaloriesFromFat,
                     lblFat, lblSatFat, lblTransFat, lblCholesterol, lblSodium, lblCarbs, lblFiber,
                     lblSugars, lblProtein, lblVitA, lblVitC, lblCalcium, lblIron;
 
-            SongListHolder(View itemView) {
+            FoodListHolder(View itemView) {
                 super(itemView);
                 lblFoodTitle        = (TextView) itemView.findViewById(R.id.lblFoodTitle);
                 lblQuantity         = (TextView) itemView.findViewById(R.id.lblServingQty);
@@ -331,7 +330,7 @@ public class ResultActivity extends AppCompatActivity implements AppBarLayout.On
             }
         }
 
-        void resetData(List<FooClass> listSong) {
+        void resetData(List<FoodClass> listSong) {
             this.foodList.clear();
             this.foodList.addAll(listSong);
             notifyDataSetChanged();
