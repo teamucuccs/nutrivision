@@ -106,6 +106,8 @@ public class MainActivity extends AppCompatActivity {
     private Uri imageUri;
     private Bitmap thumbnail;
 
+    public byte[] jpeg;
+
     String[] PERMISSIONS = {
             Manifest.permission.CAMERA,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
@@ -460,12 +462,12 @@ public class MainActivity extends AppCompatActivity {
 
     private RecognitionResult recognizeBitmap(Bitmap bitmap) {
         try {
+
             Bitmap scaled = Bitmap.createScaledBitmap(bitmap, 320,
                     320 * bitmap.getHeight() / bitmap.getWidth(), true);
-
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             scaled.compress(Bitmap.CompressFormat.JPEG, 90, out);
-            byte[] jpeg = out.toByteArray();
+            jpeg = out.toByteArray();
 
             return client.recognize(new RecognitionRequest(jpeg)).get(0);
         } catch (ClarifaiException e) {
@@ -496,6 +498,7 @@ public class MainActivity extends AppCompatActivity {
     void submitTag(String tag) {
         Intent i = new Intent(getApplicationContext(), ResultActivity.class);
         i.putExtra("str_tag", tag);
+        i.putExtra("byteArray", jpeg);
         i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(i);
         overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_left);

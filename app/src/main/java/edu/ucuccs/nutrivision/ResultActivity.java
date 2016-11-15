@@ -2,6 +2,8 @@ package edu.ucuccs.nutrivision;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
@@ -81,6 +83,12 @@ public class ResultActivity extends AppCompatActivity implements AppBarLayout.On
 
 
         mTagTitle = (String) getIntent().getExtras().get("str_tag");
+
+        if(getIntent().hasExtra("byteArray")) {
+            Bitmap bitmap = BitmapFactory.decodeByteArray(
+                    getIntent().getByteArrayExtra("byteArray"),0,getIntent().getByteArrayExtra("byteArray").length);
+            imgResult.setImageBitmap(bitmap);
+        }
 
         setUpToolbar();
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
