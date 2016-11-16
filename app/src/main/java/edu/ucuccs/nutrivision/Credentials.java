@@ -11,7 +11,7 @@ class Credentials {
     interface CLARIFAI {
 
         String CLIENT_ID = "HyvKQpTZGPqeqOBT-iiumKO0wBToi2dUXsLY-_-y";
-        String CLIENT_SECRET = "IhQv11zTu7slc_SQ9YTVdrKz40ufVPIzm2noKnkp";
+        String CLIENT_SECRET = "KWWtZYOKP_uW3aq7SGZ7Tfjj2WjlXqPzKg8b1OJI";
     }
 
     interface NUTRIONIX {

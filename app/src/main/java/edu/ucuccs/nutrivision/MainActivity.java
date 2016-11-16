@@ -66,6 +66,7 @@ import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
 import edu.ucuccs.nutrivision.custom.AdjustableLayout;
+
 import static android.provider.MediaStore.Images.Media;
 
 public class MainActivity extends AppCompatActivity {
@@ -73,10 +74,10 @@ public class MainActivity extends AppCompatActivity {
     private final ClarifaiClient client = new ClarifaiClient(Credentials.CLARIFAI.CLIENT_ID, Credentials.CLARIFAI.CLIENT_SECRET);
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    private static final int CODE_PICK      = 1;
-    private static final int CODE_SHOT      = 2;
-    private static final int REQUEST_SHOT   = 3;
-    private static final int CODE_SPEAK     = 4;
+    private static final int CODE_PICK = 1;
+    private static final int CODE_SHOT = 2;
+    private static final int REQUEST_SHOT = 3;
+    private static final int CODE_SPEAK = 4;
 
     private static final int REQUEST_STORAGE = 0;
     private static final int REQUEST_IMAGE_CAPTURE = REQUEST_STORAGE + 1;
@@ -91,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
     private FloatingActionMenu fabMenu;
 
     private CoordinatorLayout layoutRoot;
-    private TextView mLblResultTags;
+    private TextView mLblResultTags, mLblSelectTag;
     private TextView mLblEmptyState;
     private Uri cameraImageUri = null;
 
@@ -121,20 +122,21 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        FloatingActionButton mFabResto      = (FloatingActionButton) findViewById(R.id.menu_resto);
-        FloatingActionButton mFabCam        = (FloatingActionButton) findViewById(R.id.menu_camera);
-        FloatingActionButton mFabBrowse     = (FloatingActionButton) findViewById(R.id.menu_browse);
-        FloatingActionButton mFabSpeak      = (FloatingActionButton) findViewById(R.id.menu_speak);
-        FloatingActionButton mFabSearch     = (FloatingActionButton) findViewById(R.id.menu_search);
+        FloatingActionButton mFabResto = (FloatingActionButton) findViewById(R.id.menu_resto);
+        FloatingActionButton mFabCam = (FloatingActionButton) findViewById(R.id.menu_camera);
+        FloatingActionButton mFabBrowse = (FloatingActionButton) findViewById(R.id.menu_browse);
+        FloatingActionButton mFabSpeak = (FloatingActionButton) findViewById(R.id.menu_speak);
+        FloatingActionButton mFabSearch = (FloatingActionButton) findViewById(R.id.menu_search);
 
-        mToolbar            = (Toolbar) findViewById(R.id.toolbar);
-        bottomSheetGallery  = (BottomSheetLayout) findViewById(R.id.btmsheet_gallery);
-        layoutRoot          = (CoordinatorLayout) findViewById(R.id.layoutRoot);
-        fabMenu             = (FloatingActionMenu) findViewById(R.id.fab_menu);
-        imgResult           = (ImageView) findViewById(R.id.img_result);
-        mLblResultTags      = (TextView) findViewById(R.id.lbl_result_tag);
-        mLblEmptyState      = (TextView) findViewById(R.id.lbl_empty_state);
-        imgEmptyState       = (ImageView) findViewById(R.id.img_empty_state);
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        bottomSheetGallery = (BottomSheetLayout) findViewById(R.id.btmsheet_gallery);
+        layoutRoot = (CoordinatorLayout) findViewById(R.id.layoutRoot);
+        fabMenu = (FloatingActionMenu) findViewById(R.id.fab_menu);
+        imgResult = (ImageView) findViewById(R.id.img_result);
+        mLblResultTags = (TextView) findViewById(R.id.lbl_result_tag);
+        mLblEmptyState = (TextView) findViewById(R.id.lbl_empty_state);
+        imgEmptyState = (ImageView) findViewById(R.id.img_empty_state);
+        mLblSelectTag = (TextView) findViewById(R.id.lbl_select_tag);
 
         mLinearEmpty = (LinearLayout) findViewById(R.id.layout_empty_state);
         confirmTextDialog = new AlertDialog.Builder(this);
@@ -197,16 +199,16 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowHomeEnabled(true);
     }
 
-    void grantPermissions(){
-        if(!hasPermissions(getApplicationContext(), PERMISSIONS)) {
+    void grantPermissions() {
+        if (!hasPermissions(getApplicationContext(), PERMISSIONS)) {
             ActivityCompat.requestPermissions(MainActivity.this, PERMISSIONS, 1);
         }
     }
 
-    private static boolean hasPermissions(Context context, String...permissions){
-        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M && context!=null && permissions!=null){
-            for(String permission:permissions){
-                if(ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED){
+    private static boolean hasPermissions(Context context, String... permissions) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context != null && permissions != null) {
+            for (String permission : permissions) {
+                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
                     return false;
                 }
             }
@@ -214,7 +216,7 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    public void getSend(){
+    public void getSend() {
         // Get intent, action and MIME type
         Intent intent = getIntent();
         String action = intent.getAction();
@@ -245,8 +247,7 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
 
-        }
-        else {
+        } else {
             mLblResultTags.setText("Unable to load selected image.");
         }
     }
@@ -276,33 +277,31 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
-
     @TargetApi(Build.VERSION_CODES.M)
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
             case REQUEST_SHOT: {
-                    if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                        cameraShot();
-                    } else {
-                        Utils.showToast(getString(R.string.info_allow_permission_capture), Toast.LENGTH_LONG);
-                    }
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    cameraShot();
+                } else {
+                    Utils.showToast(getString(R.string.info_allow_permission_capture), Toast.LENGTH_LONG);
                 }
-                break;
+            }
+            break;
             case REQUEST_STORAGE:
-                    if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                        hideSoftKeyboard();
-                        showSheetView();
-                    } else {
-                        Toast.makeText(this, "Allow permission to access external storage", Toast.LENGTH_SHORT).show();
-                    }
+                if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    hideSoftKeyboard();
+                    showSheetView();
+                } else {
+                    Toast.makeText(this, "Allow permission to access external storage", Toast.LENGTH_SHORT).show();
+                }
                 break;
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-    public void speechText(){
+    public void speechText() {
         Intent mIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         mIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         mIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
@@ -359,7 +358,7 @@ public class MainActivity extends AppCompatActivity {
             } else if (requestCode == CODE_SPEAK && resultCode == RESULT_OK && null != data) {
                 final ArrayList<String> result = data
                         .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                        confirmTextDialog.setTitle(R.string.confirm_msg_correct)
+                confirmTextDialog.setTitle(R.string.confirm_msg_correct)
                         .setMessage(result.get(0))
                         .setPositiveButton(R.string.action_submit, new DialogInterface.OnClickListener() {
                             @Override
@@ -424,7 +423,7 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
-    void callClarifai(Bitmap bitmap){
+    void callClarifai(Bitmap bitmap) {
         mLblResultTags.setText(R.string.info_msg_loading);
         new AsyncTask<Bitmap, Void, RecognitionResult>() {
             @Override
@@ -486,6 +485,7 @@ public class MainActivity extends AppCompatActivity {
                     b.append(b.length() > 0 ? ", " : "").append(tag.getName());
                 }
                 mLblResultTags.setVisibility(View.GONE);
+                mLblSelectTag.setVisibility(View.VISIBLE);
                 addChipsViewFinal(tagsListInitial);
             } else {
                 mLblResultTags.setText(R.string.err_msg_unrecognized_image);
@@ -519,7 +519,7 @@ public class MainActivity extends AppCompatActivity {
                     final String tempTags = txtChipTag.getText().toString();
                     if (mNetConn.isConnectedToInternet()) {
                         submitTag(tempTags);
-                    }else{
+                    } else {
                         Utils.showSnackBar(getString(R.string.err_msg_cannot_connect), layoutRoot, Toast.LENGTH_LONG);
                         Snackbar snackbar = Snackbar.make(layoutRoot, R.string.msg_no_connection_short, Snackbar.LENGTH_LONG)
                                 .setAction(R.string.action_retry, new View.OnClickListener() {
@@ -655,8 +655,9 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
     private void sendSelectedImage(Uri selectedImageUri) throws ExecutionException, InterruptedException {
-        Log.d("uri",selectedImageUri + "");
+        Log.d("uri", selectedImageUri + "");
         imgResult.setImageDrawable(null);
         Bitmap bitmap = null;
         String photo = null;
@@ -675,6 +676,7 @@ public class MainActivity extends AppCompatActivity {
     private void genericError() {
         genericError(null);
     }
+
     private void genericError(String message) {
         Toast.makeText(this, message == null ? "Something went wrong." : message, Toast.LENGTH_SHORT).show();
     }

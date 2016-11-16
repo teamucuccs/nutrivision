@@ -19,6 +19,16 @@
                 android:scaleType="centerCrop" />
 
             <TextView
+                android:id="@+id/lbl_select_tag"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Click one of the tags below..."
+                android:layout_marginLeft="10dp"
+                android:textSize="18sp"
+                android:visibility="gone"
+                />
+
+            <TextView
                 android:id="@+id/lbl_result_tag"
                 android:layout_width="match_parent"
                 android:layout_height="100dp"
