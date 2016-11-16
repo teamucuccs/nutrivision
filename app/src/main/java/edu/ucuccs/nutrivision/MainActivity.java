@@ -1,6 +1,7 @@
 package edu.ucuccs.nutrivision;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.SearchManager;
@@ -227,7 +228,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void handleSendImage(Intent intent) {
-        Uri imageUriSend = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
+        Uri imageUriSend = intent.getParcelableExtra(Intent.EXTRA_STREAM);
         if (imageUriSend != null) {
             // Update UI to reflect image being shared
 
@@ -427,7 +428,6 @@ public class MainActivity extends AppCompatActivity {
         new AsyncTask<Bitmap, Void, RecognitionResult>() {
             @Override
             protected RecognitionResult doInBackground(Bitmap... bitmaps) {
-                Log.d(TAG, "doInBackground: " + bitmaps[0]);
                 return recognizeBitmap(bitmaps[0]);
             }
 
@@ -460,13 +460,10 @@ public class MainActivity extends AppCompatActivity {
 
     private RecognitionResult recognizeBitmap(Bitmap bitmap) {
         try {
-            Bitmap scaled = Bitmap.createScaledBitmap(bitmap, 320,
-                    320 * bitmap.getHeight() / bitmap.getWidth(), true);
-
+            Bitmap scaled = Bitmap.createScaledBitmap(bitmap, 320, 320 * bitmap.getHeight() / bitmap.getWidth(), true);
             ByteArrayOutputStream out = new ByteArrayOutputStream();
-            scaled.compress(Bitmap.CompressFormat.JPEG, 90, out);
+            scaled.compress(Bitmap.CompressFormat.PNG, 90, out);
             byte[] jpeg = out.toByteArray();
-
             return client.recognize(new RecognitionRequest(jpeg)).get(0);
         } catch (ClarifaiException e) {
             return null;
@@ -505,7 +502,7 @@ public class MainActivity extends AppCompatActivity {
         AdjustableLayout adjustableLayout = (AdjustableLayout) findViewById(R.id.container);
         adjustableLayout.removeAllViews();
         for (int i = 0; i < tagList.size(); i++) {
-            final View newView = LayoutInflater.from(this).inflate(R.layout.layout_view_chip_text, null);
+            @SuppressLint("InflateParams") final View newView = LayoutInflater.from(this).inflate(R.layout.layout_view_chip_text, null);
             LinearLayout linearChipTag = (LinearLayout) newView.findViewById(R.id.linear_chip_tag);
             final TextView txtChipTag = (TextView) newView.findViewById(R.id.txt_chip_content);
 
@@ -656,10 +653,8 @@ public class MainActivity extends AppCompatActivity {
         Log.d("uri",selectedImageUri + "");
         imgResult.setImageDrawable(null);
         Bitmap bitmap = null;
-        String photo = null;
         try {
             bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImageUri);
-            photo = Utils.convertBitmapToBase64(bitmap);
         } catch (IOException e) {
             e.printStackTrace();
         }
