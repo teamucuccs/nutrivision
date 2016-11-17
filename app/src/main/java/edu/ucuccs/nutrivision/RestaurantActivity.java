@@ -13,13 +13,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 
@@ -32,6 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.ucuccs.nutrivision.custom.CircleImageTransform;
+import edu.ucuccs.nutrivision.custom.CustomRequest;
 
 public class RestaurantActivity extends AppCompatActivity {
     private Toolbar mToolbar;
@@ -41,13 +44,20 @@ public class RestaurantActivity extends AppCompatActivity {
     private RecyclerView mRecyResto;
     private static final String TAG = RestaurantActivity.class.getSimpleName();
     private ProgressDialog pDialog;
+    NetworkConnectivity mNetConn = new NetworkConnectivity(RestaurantActivity.this);
+    private ImageView imgEmptyState;
+    private TextView mLblEmptyState;
+    private RestoAdapter adapter = new RestoAdapter(RestaurantActivity.this, feedListContent(mRestoID), mRecyResto);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_restaurant);
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        mRecyResto = (RecyclerView) findViewById(R.id.recyResto);
+        LinearLayout mLinearEmpty   = (LinearLayout) findViewById(R.id.layout_empty_state);
+        mToolbar                    = (Toolbar) findViewById(R.id.toolbar);
+        mRecyResto                  = (RecyclerView) findViewById(R.id.recyResto);
+        mLblEmptyState              = (TextView) findViewById(R.id.lbl_empty_state);
+        imgEmptyState               = (ImageView) findViewById(R.id.img_empty_state);
         setUpToolbar();
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -58,12 +68,24 @@ public class RestaurantActivity extends AppCompatActivity {
         });
         mRecyResto.setHasFixedSize(true);
         mRecyResto.setLayoutManager(new GridLayoutManager(this, 2));
-        loadRestaurants();
+        mRecyResto.setAdapter(adapter);
+
+        if(mNetConn.isConnectedToInternet()){
+            mLinearEmpty.setVisibility(View.GONE);
+            loadRestaurants();
+        }else{
+            showNoConnectionState();
+        }
     }
     void setUpToolbar(){
         setSupportActionBar(mToolbar);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        if (getSupportActionBar() != null)
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+    void showNoConnectionState() {
+        imgEmptyState.setImageResource(R.drawable.empty_state_onion_connection);
+        mLblEmptyState.setText(R.string.msg_no_connection);
     }
     private void loadRestaurants() {
         pDialog = new ProgressDialog(this);
@@ -72,11 +94,10 @@ public class RestaurantActivity extends AppCompatActivity {
         pDialog.show();
 
         RequestQueue requestQueue = Volley.newRequestQueue(this);
-        JsonObjectRequest obreq = new JsonObjectRequest(Request.Method.GET,  Credentials.NUTRIVISION.RESTAURANTS_URL, null, new Response.Listener<JSONObject>() {
-
+        CustomRequest obreq = new CustomRequest (Request.Method.GET,  Credentials.NUTRIVISION.RESTAURANTS_URL, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
-                pDialog.hide();
+                pDialog.dismiss();
                 try {
                     JSONArray arrResto = response.getJSONArray("resto");
                     Log.d(TAG, "onResponse: " + arrResto);
@@ -89,7 +110,6 @@ public class RestaurantActivity extends AppCompatActivity {
                         mRestoLogo.add(objFields.getString("resto_logo"));
 
                     }
-                    RestoAdapter adapter;
                     if (mRecyResto.getAdapter() == null) {
                         adapter = new RestoAdapter(getApplicationContext(), feedListContent(mRestoID), mRecyResto);
                         mRecyResto.setAdapter(adapter);
@@ -103,16 +123,47 @@ public class RestaurantActivity extends AppCompatActivity {
                 }
             }
         },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
+        new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                String json;
+                NetworkResponse response = error.networkResponse;
+                if(response != null && response.data != null){
+                    switch(response.statusCode){
+                        case 400:
+                            json = new String(response.data);
+                            json = trimMessage(json, "message");
+                            if(json != null) displayMessage(json);
+                            break;
+                        case 502:
+                            json = new String(response.data);
+                            json = trimMessage(json, "message");
+                            if(json != null) displayMessage(json);
+                            break;
 
                     }
                 }
+            }
+        }
         );
         requestQueue.add(obreq);
     }
+    public String trimMessage(String json, String key){
+        String trimmedString;
+        try{
+            JSONObject obj = new JSONObject(json);
+            trimmedString = obj.getString(key);
+        } catch(JSONException e){
+            e.printStackTrace();
+            return null;
+        }
 
+        return trimmedString;
+    }
+
+    public void displayMessage(String toastString){
+        Toast.makeText(getApplicationContext(), toastString, Toast.LENGTH_LONG).show();
+    }
 
     private void clearArray() {
         mRestoID.clear();
@@ -159,6 +210,7 @@ public class RestaurantActivity extends AppCompatActivity {
             hldr.lblRestoName.setText(ci.resto_name);
             Glide.with(mContext)
                     .load(ci.resto_logo)
+                    .placeholder(R.drawable.circle_accent)
                     .transform(new CircleImageTransform(mContext))
                     .into(hldr.imgRestoLogo);
             hldr.imgRestoLogo.setOnClickListener(new View.OnClickListener() {
@@ -168,6 +220,7 @@ public class RestaurantActivity extends AppCompatActivity {
                     Bundle bundle = new Bundle();
                     bundle.putString("resto_name", ci.resto_name);
                     bundle.putString("resto_logo", ci.resto_logo);
+                    bundle.putString("resto_id", ci.resto_id);
                     i.putExtras(bundle);
                     i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(i);

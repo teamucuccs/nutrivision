@@ -9,18 +9,17 @@ package edu.ucuccs.nutrivision;
 class Credentials {
 
     interface CLARIFAI {
-
         String CLIENT_ID = "HyvKQpTZGPqeqOBT-iiumKO0wBToi2dUXsLY-_-y";
         String CLIENT_SECRET = "KWWtZYOKP_uW3aq7SGZ7Tfjj2WjlXqPzKg8b1OJI";
     }
 
     interface NUTRIONIX {
-        String APP_ID = "F5fbBfo8MZtjMeeNWn_Fc9pC-u97usHofgiNz5tp";
-        String API_KEY = "070502cd54fa6bfb1790e382e10c7731";
+        String APP_ID = "f8d8df72";
+        String API_KEY = "d9aea37b804ffef0a9cdc1378638706c";
     }
 
     interface NUTRIVISION{
-        String RESTAURANTS_URL = "http://ucu.edu.ph/nutrivision-api/v1/restaurants";
+        String RESTAURANTS_URL = "http://192.168.4.141/nutrivision-api/v1/restaurants/";
     }
 
     String returnURL(String keyword){

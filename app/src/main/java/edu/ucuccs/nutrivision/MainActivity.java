@@ -1,6 +1,7 @@
 package edu.ucuccs.nutrivision;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.SearchManager;
@@ -196,7 +197,8 @@ public class MainActivity extends AppCompatActivity {
 
     void setUpToolbar() {
         setSupportActionBar(mToolbar);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        if (getSupportActionBar() != null)
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
     }
 
     void grantPermissions() {
@@ -243,12 +245,11 @@ public class MainActivity extends AppCompatActivity {
                 imgResult.setImageBitmap(thumbnail);
                 callClarifai(thumbnail);
             } catch (FileNotFoundException e) {
-                mLblResultTags.setText("Unable to load selected image.");
+                mLblResultTags.setText(R.string.err_unable_load_image);
                 e.printStackTrace();
             }
-
         } else {
-            mLblResultTags.setText("Unable to load selected image.");
+            mLblResultTags.setText(R.string.err_unable_load_image);
         }
     }
 
@@ -324,6 +325,7 @@ public class MainActivity extends AppCompatActivity {
 
             Intent i = new Intent(getApplicationContext(), ResultActivity.class);
             i.putExtra("str_tag", query);
+            i.putExtra("type", 1);
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(i);
         }
@@ -351,7 +353,7 @@ public class MainActivity extends AppCompatActivity {
                     imgResult.setImageBitmap(thumbnail);
                     callClarifai(thumbnail);
                 } catch (Exception e) {
-                    mLblResultTags.setText("Unable to load selected image.");
+                    mLblResultTags.setText(R.string.err_unable_load_image);
                     e.printStackTrace();
                 }
 
@@ -365,6 +367,7 @@ public class MainActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialog, int which) {
                                 Intent i = new Intent(getApplicationContext(), ResultActivity.class);
                                 i.putExtra("str_tag", result.get(0));
+                                i.putExtra("type", 1);
                                 i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                 startActivity(i);
                             }
@@ -498,6 +501,7 @@ public class MainActivity extends AppCompatActivity {
     void submitTag(String tag) {
         Intent i = new Intent(getApplicationContext(), ResultActivity.class);
         i.putExtra("str_tag", tag);
+        i.putExtra("type", 1);
         i.putExtra("byteArray", jpeg);
         i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(i);
@@ -508,7 +512,7 @@ public class MainActivity extends AppCompatActivity {
         AdjustableLayout adjustableLayout = (AdjustableLayout) findViewById(R.id.container);
         adjustableLayout.removeAllViews();
         for (int i = 0; i < tagList.size(); i++) {
-            final View newView = LayoutInflater.from(this).inflate(R.layout.layout_view_chip_text, null);
+            @SuppressLint("InflateParams") final View newView = LayoutInflater.from(this).inflate(R.layout.layout_view_chip_text, null);
             LinearLayout linearChipTag = (LinearLayout) newView.findViewById(R.id.linear_chip_tag);
             final TextView txtChipTag = (TextView) newView.findViewById(R.id.txt_chip_content);
 

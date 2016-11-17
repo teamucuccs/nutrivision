@@ -68,6 +68,8 @@ public class ResultActivity extends AppCompatActivity implements AppBarLayout.On
     private int mMaxScrollSize;
     private boolean mIsImageHidden;
     private CollapsingToolbarLayout collapseToolbar;
+    private int menuItemID;
+    private String restoID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,7 +84,8 @@ public class ResultActivity extends AppCompatActivity implements AppBarLayout.On
         recyFoods.setHasFixedSize(true);
 
 
-        mTagTitle = (String) getIntent().getExtras().get("str_tag");
+        mTagTitle   = (String) getIntent().getExtras().get("str_tag");
+        int type    = getIntent().getExtras().getInt("type");
 
         if(getIntent().hasExtra("byteArray")) {
             Bitmap bitmap = BitmapFactory.decodeByteArray(
@@ -101,11 +104,22 @@ public class ResultActivity extends AppCompatActivity implements AppBarLayout.On
 
         AppBarLayout appbar = (AppBarLayout) findViewById(R.id.flexible_example_appbar);
         appbar.addOnOffsetChangedListener(this);
-        loadNutriFacts();
+        switch (type){
+            case 1:
+                loadNutriFacts();
+                break;
+            case 2:
+                menuItemID =   getIntent().getExtras().getInt("menu_item_id");
+                restoID =   (String) getIntent().getExtras().get("resto_id");
+                loadRestoNutriFacts();
+                break;
+
+        }
     }
     void setUpToolbar(){
         setSupportActionBar(mToolbar);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        if (getSupportActionBar() != null)
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         collapseToolbar.setTitle(mTagTitle.substring(0,1).toUpperCase() + mTagTitle.substring(1).toLowerCase());
     }
@@ -115,11 +129,11 @@ public class ResultActivity extends AppCompatActivity implements AppBarLayout.On
         pDialog.show();
 
         RequestQueue requestQueue = Volley.newRequestQueue(this);
-        JsonObjectRequest obreq = new JsonObjectRequest(Request.Method.GET,  new Credentials().returnURL(mTagTitle),null, new Response.Listener<JSONObject>() {
+        JsonObjectRequest obreq = new JsonObjectRequest(Request.Method.GET,  new Credentials().returnURL(mTagTitle), null, new Response.Listener<JSONObject>() {
 
             @Override
             public void onResponse(JSONObject response) {
-                pDialog.hide();
+                pDialog.dismiss();
                 try {
                     JSONArray arrHits = response.getJSONArray("hits");
                     Log.d(TAG, "onResponse: " + arrHits.length());
@@ -152,6 +166,64 @@ public class ResultActivity extends AppCompatActivity implements AppBarLayout.On
                         mArrayCalcium.add(test.getString("nf_calcium_dv"));
                         mArrayIron.add(test.getString("nf_iron_dv"));
 
+                    }
+                    FoodsAdapter adapter;
+                    if (recyFoods.getAdapter() == null) {
+                        adapter = new FoodsAdapter(getApplicationContext(), feedListContent(mArrayID), recyFoods);
+                        recyFoods.setAdapter(adapter);
+                    } else {
+                        adapter = ((FoodsAdapter) recyFoods.getAdapter());
+                        adapter.resetData(feedListContent(mArrayID));
+                    }
+                }
+                catch (JSONException e) {
+                    e.printStackTrace();
+                    nutriText.setVisibility(View.VISIBLE);
+                }
+            }
+        },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        pDialog.hide();
+                        nutriText.setVisibility(View.VISIBLE);
+                        Log.e("Volley", "Error");
+                    }
+                }
+        );
+        requestQueue.add(obreq);
+    }
+
+    private void loadRestoNutriFacts() {
+        pDialog = new ProgressDialog(this);
+        pDialog.setMessage("Loading...");
+        pDialog.show();
+
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        JsonObjectRequest obreq = new JsonObjectRequest(Request.Method.GET,  Credentials.NUTRIVISION.RESTAURANTS_URL + restoID, null, new Response.Listener<JSONObject>() {
+
+            @Override
+            public void onResponse(JSONObject response) {
+                pDialog.dismiss();
+                try {
+                    JSONArray arrResto = response.getJSONArray("menu");
+                    clearArray();
+                    for (int i = 0; i < arrResto.length(); i++) {
+
+                        JSONObject test = arrResto.getJSONObject(i);
+                        int tempItemID = Integer.parseInt(test.getString("menu_item_id"));
+                        if(menuItemID == tempItemID){
+                            mArrayID.add(String.valueOf(tempItemID));
+                            mArrayName.add(test.getString("menu_item_name"));
+                            mArrayUnit.add(test.getString("n_serving_size"));
+                            mArrayCalories.add(test.getString("n_calories"));
+                            mArrayFat.add(test.getString("n_fat"));
+                            mArrayCholesterol.add(test.getString("n_cholesterol"));
+                            mArraySodium.add(test.getString("n_sodium"));
+                            mArrayCarbs.add(test.getString("n_carbs"));
+                            mArrayProtein.add(test.getString("n_protein"));
+
+                        }
                     }
                     FoodsAdapter adapter;
                     if (recyFoods.getAdapter() == null) {
@@ -232,24 +304,24 @@ public class ResultActivity extends AppCompatActivity implements AppBarLayout.On
             FoodClass ci = new FoodClass();
             ci.food_id = mArrayID.get(i).toString();
             ci.food_name = mArrayName.get(i);
-            ci.food_brand = mArrayBrand.get(i);
-            ci.food_qty = mArrayQty.get(i);
-            ci.food_unit = mArrayUnit.get(i);
+            ci.food_brand = mArrayBrand.size() > 0 ? mArrayBrand.get(i) : "null";
+            ci.food_qty = mArrayQty.size() > 0 ? mArrayQty.get(i) : "null";
+            ci.food_unit = mArrayUnit.size() > 0 ? mArrayUnit.get(i) : "null";
             ci.food_calories = mArrayCalories.get(i);
-            ci.food_caloriesfromfat = mArrayCaloriesFromFat.get(i);
+            ci.food_caloriesfromfat =  mArrayCaloriesFromFat.size() > 0 ? mArrayCaloriesFromFat.get(i) : "null";
             ci.food_fat = mArrayFat.get(i);
-            ci.food_satfat = mArraySatFat.get(i);
-            ci.food_transfat = mArrayTransFat.get(i);
+            ci.food_satfat = mArraySatFat.size() > 0 ? mArraySatFat.get(i) : "null";
+            ci.food_transfat = mArrayTransFat.size() > 0 ? mArrayTransFat.get(i) : "null";
             ci.food_cholesterol = mArrayCholesterol.get(i);
             ci.food_sodium = mArraySodium.get(i);
             ci.food_carbs = mArrayCarbs.get(i);
-            ci.food_fiber = mArrayFiber.get(i);
-            ci.food_sugars = mArraySugars.get(i);
-            ci.food_protein = mArrayProtein.get(i);
-            ci.food_vita = mArrayVitA.get(i);
-            ci.food_vitc = mArrayVitC.get(i);
-            ci.food_calcium = mArrayCalcium.get(i);
-            ci.food_iron = mArrayIron.get(i);
+            ci.food_fiber = mArrayFiber.size() > 0 ? mArrayFiber.get(i) : "null";
+            ci.food_sugars = mArraySugars.size() > 0 ? mArraySugars.get(i) : "null";
+            ci.food_protein = mArrayProtein.size() > 0 ? mArrayProtein.get(i) : "null";
+            ci.food_vita =  mArrayVitA.size() > 0 ? mArrayVitA.get(i) : "null";
+            ci.food_vitc = mArrayVitC.size() > 0 ? mArrayVitC.get(i) : "null";
+            ci.food_calcium = mArrayCalcium.size() > 0 ? mArrayCalcium.get(i) : "null";
+            ci.food_iron = mArrayIron.size() > 0 ? mArrayIron.get(i) : "null";
             result.add(ci);
         }
         return result;
